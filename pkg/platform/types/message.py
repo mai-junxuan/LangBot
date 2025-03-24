@@ -801,12 +801,18 @@ class File(MessageComponent):
     """文件。"""
     type: str = "File"
     """消息组件类型。"""
-    id: str
+    file_id: str
     """文件识别 ID。"""
     name: str
     """文件名称。"""
     size: int
     """文件大小。"""
+    url: str
+    """文件 URL。发送时可作网络文件的链接；接收时为文件的链接，可用于文件下载。"""
+    path: str
+    """文件路径。发送本地文件。"""
+    base64: str
+    """文件 Base64 编码。"""
     def __str__(self):
         return f'[文件]{self.name}'
 
