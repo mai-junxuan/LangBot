@@ -21,11 +21,8 @@ export default function HomeLayout({
     const checkIfMobile = () => {
       setIsMobile(window.innerWidth <= 768);
     };
-    
     checkIfMobile();
-    
     window.addEventListener('resize', checkIfMobile);
-    
     return () => window.removeEventListener('resize', checkIfMobile);
   }, []);
 
@@ -44,15 +41,17 @@ export default function HomeLayout({
 
   return (
     <div className={styles.homeLayoutContainer}>
-      <aside className={`${styles.sidebar} ${isMobileMenuOpen ? styles.sidebarOpen : ''}`}>
+      <aside
+        className={`${styles.sidebar} ${isMobileMenuOpen ? styles.sidebarOpen : ''}`}
+      >
         <HomeSidebar onSelectedChangeAction={onSelectedChangeAction} />
       </aside>
 
       <div className={styles.main}>
-        <HomeTitleBar 
-          title={title} 
-          subtitle={subtitle} 
-          helpLink={helpLink} 
+        <HomeTitleBar
+          title={title}
+          subtitle={subtitle}
+          helpLink={helpLink}
           onMenuToggle={toggleMobileMenu}
         />
 

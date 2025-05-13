@@ -1,5 +1,4 @@
 import styles from './HomeTittleBar.module.css';
-import { useState } from 'react';
 
 export default function HomeTitleBar({
   title,
@@ -30,12 +29,9 @@ export default function HomeTitleBar({
           </a>
         </span>
       </div>
-      
+
       {/* 移动端汉堡菜单按钮 */}
-      <div 
-        className={`${styles.menuButton}`} 
-        onClick={onMenuToggle}
-      >
+      <div className={`${styles.menuButton}`} onClick={onMenuToggle}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
