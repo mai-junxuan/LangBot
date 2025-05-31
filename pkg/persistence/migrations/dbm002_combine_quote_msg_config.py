@@ -28,7 +28,12 @@ class DBMigrateCombineQuoteMsgConfig(migration.DBMigration):
             await self.ap.persistence_mgr.execute_async(
                 sqlalchemy.update(persistence_pipeline.LegacyPipeline)
                 .where(persistence_pipeline.LegacyPipeline.uuid == serialized_pipeline['uuid'])
-                .values({'config': config, 'for_version': self.ap.ver_mgr.get_current_version()})
+                .values(
+                    {
+                        'config': config,
+                        'for_version': self.ap.ver_mgr.get_current_version(),
+                    }
+                )
             )
 
     async def downgrade(self):
