@@ -13,6 +13,7 @@ from ..provider.tools import toolmgr as llm_tool_mgr
 from ..config import manager as config_mgr
 from ..command import cmdmgr
 from ..plugin import manager as plugin_mgr
+from ..plugin import connector as plugin_connector
 from ..pipeline import pool
 from ..pipeline import controller, pipelinemgr
 from ..utils import version as version_mgr, proxy as proxy_mgr, announce as announce_mgr
@@ -77,6 +78,8 @@ class Application:
 
     plugin_mgr: plugin_mgr.PluginManager = None
 
+    plugin_connector: plugin_connector.PluginRuntimeConnector = None
+
     query_pool: pool.QueryPool = None
 
     ctrl: controller.Controller = None
@@ -117,6 +120,8 @@ class Application:
 
     async def run(self):
         try:
+            await self.plugin_connector.initialize_plugins()
+
             await self.plugin_mgr.initialize_plugins()
 
             # 后续可能会允许动态重启其他任务

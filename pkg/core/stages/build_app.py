@@ -5,6 +5,7 @@ from .. import stage, app
 from ...utils import version, proxy, announce
 from ...pipeline import pool, controller, pipelinemgr
 from ...plugin import manager as plugin_mgr
+from ...plugin import connector as plugin_connector
 from ...command import cmdmgr
 from ...provider.session import sessionmgr as llm_session_mgr
 from ...provider.modelmgr import modelmgr as llm_model_mgr
@@ -63,6 +64,10 @@ class BuildAppStage(stage.BootingStage):
         await plugin_mgr_inst.initialize()
         ap.plugin_mgr = plugin_mgr_inst
         await plugin_mgr_inst.load_plugins()
+
+        plugin_connector_inst = plugin_connector.PluginRuntimeConnector(ap)
+        await plugin_connector_inst.initialize()
+        ap.plugin_connector = plugin_connector_inst
 
         cmd_mgr_inst = cmdmgr.CommandManager(ap)
         await cmd_mgr_inst.initialize()
