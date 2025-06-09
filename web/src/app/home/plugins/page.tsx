@@ -17,10 +17,11 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { GithubIcon } from 'lucide-react';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { httpClient } from '@/app/infra/http/HttpClient';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 enum PluginInstallStatus {
   WAIT_INPUT = 'wait_input',
@@ -30,6 +31,8 @@ enum PluginInstallStatus {
 
 export default function PluginConfigPage() {
   const { t } = useTranslation();
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [modalOpen, setModalOpen] = useState(false);
   const [sortModalOpen, setSortModalOpen] = useState(false);
   const [pluginInstallStatus, setPluginInstallStatus] =
@@ -37,6 +40,16 @@ export default function PluginConfigPage() {
   const [installError, setInstallError] = useState<string | null>(null);
   const [githubURL, setGithubURL] = useState('');
   const pluginInstalledRef = useRef<PluginInstalledComponentRef>(null);
+
+  // Get current tab from URL or default to 'installed'
+  const currentTab = searchParams.get('tab') || 'installed';
+
+  // Handle tab change
+  const handleTabChange = (value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('tab', value);
+    router.push(`?${params.toString()}`);
+  };
 
   function handleModalConfirm() {
     installPlugin(githubURL);
@@ -83,7 +96,7 @@ export default function PluginConfigPage() {
 
   return (
     <div className={styles.pageContainer}>
-      <Tabs defaultValue="installed" className="w-full">
+      <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full">
         <div className="flex flex-row justify-between items-center px-[0.8rem]">
           <TabsList className="shadow-md py-5 bg-[#f0f0f0]">
             <TabsTrigger value="installed" className="px-6 py-4 cursor-pointer">
