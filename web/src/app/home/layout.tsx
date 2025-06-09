@@ -6,6 +6,7 @@ import HomeTitleBar from '@/app/home/components/home-titlebar/HomeTitleBar';
 import React, { useState } from 'react';
 import { SidebarChildVO } from '@/app/home/components/home-sidebar/HomeSidebarChild';
 import { I18nLabel } from '@/app/infra/entities/common';
+import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 
 export default function HomeLayout({
   children,
@@ -25,16 +26,20 @@ export default function HomeLayout({
   };
 
   return (
-    <div className={styles.homeLayoutContainer}>
-      <aside className={styles.sidebar}>
+    <SidebarProvider>
+      <div className={styles.homeLayoutContainer}>
         <HomeSidebar onSelectedChangeAction={onSelectedChangeAction} />
-      </aside>
-
-      <div className={styles.main}>
-        <HomeTitleBar title={title} subtitle={subtitle} helpLink={helpLink} />
-
-        <main className={styles.mainContent}>{children}</main>
+        <SidebarInset>
+          <div className={styles.main}>
+            <HomeTitleBar
+              title={title}
+              subtitle={subtitle}
+              helpLink={helpLink}
+            />
+            <main className={styles.mainContent}>{children}</main>
+          </div>
+        </SidebarInset>
       </div>
-    </div>
+    </SidebarProvider>
   );
 }

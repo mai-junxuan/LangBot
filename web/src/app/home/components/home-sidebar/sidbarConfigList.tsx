@@ -1,5 +1,4 @@
 import { SidebarChildVO } from '@/app/home/components/home-sidebar/HomeSidebarChild';
-import styles from './HomeSidebar.module.css';
 import i18n from '@/i18n';
 
 const t = (key: string) => {
@@ -12,7 +11,6 @@ export const sidebarConfigList = [
     name: t('bots.title'),
     icon: (
       <svg
-        className={`${styles.sidebarChildIcon}`}
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
         fill="currentColor"
@@ -32,7 +30,6 @@ export const sidebarConfigList = [
     name: t('models.title'),
     icon: (
       <svg
-        className={`${styles.sidebarChildIcon}`}
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
         fill="currentColor"
@@ -52,7 +49,6 @@ export const sidebarConfigList = [
     name: t('pipelines.title'),
     icon: (
       <svg
-        className={`${styles.sidebarChildIcon}`}
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
         fill="currentColor"
@@ -72,7 +68,6 @@ export const sidebarConfigList = [
     name: t('plugins.title'),
     icon: (
       <svg
-        className={`${styles.sidebarChildIcon}`}
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
         fill="currentColor"
