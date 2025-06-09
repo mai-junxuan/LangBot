@@ -62,7 +62,9 @@ export default function HomeSidebar({
 
   function handleRoute(child: SidebarChildVO) {
     console.log(child);
-    router.push(`${child.route}`);
+    const route =
+      child.id === 'plugins' ? `${child.route}?tab=installed` : child.route;
+    router.push(route);
   }
 
   function handleRouteChange(pathname: string) {
