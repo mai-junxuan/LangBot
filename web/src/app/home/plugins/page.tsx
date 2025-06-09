@@ -1,4 +1,7 @@
 'use client';
+
+export const dynamic = 'force-dynamic';
+
 import PluginInstalledComponent, {
   PluginInstalledComponentRef,
 } from '@/app/home/plugins/plugin-installed/PluginInstalledComponent';
