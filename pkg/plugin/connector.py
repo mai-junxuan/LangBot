@@ -29,17 +29,23 @@ class PluginRuntimeConnector:
 
     async def initialize(self):
         async def new_connection_callback(connection: stdio_connection.StdioConnection):
-            self.ap.logger.info('Connected to plugin runtime.')
-            self.handler = handler.RuntimeConnectionHandler(connection)
+            self.handler = handler.RuntimeConnectionHandler(connection, self.ap)
             self.handler_task = asyncio.create_task(self.handler.run())
+            _ = await self.handler.ping()
+            self.ap.logger.info('Connected to plugin runtime.')
+            await self.handler_task
+
+        task: asyncio.Task | None = None
 
         if platform.get_platform() == 'docker':  # use websocket
+            self.ap.logger.info('use websocket to connect to plugin runtime')
             ws_url = self.ap.instance_config.data['plugin']['runtime_ws_url']
             ctrl = ws_client_controller.WebSocketClientController(
                 ws_url=ws_url,
             )
-            await ctrl.run(new_connection_callback)
+            task = ctrl.run(new_connection_callback)
         else:  # stdio
+            self.ap.logger.info('use stdio to connect to plugin runtime')
             # cmd: lbp rt -s
             python_path = sys.executable
             env = os.environ.copy()
@@ -48,7 +54,9 @@ class PluginRuntimeConnector:
                 args=['-m', 'langbot_plugin.cli.__init__', 'rt', '-s'],
                 env=env,
             )
-            await ctrl.run(new_connection_callback)
+            task = ctrl.run(new_connection_callback)
+
+        asyncio.create_task(task)
 
     async def run(self):
         pass
