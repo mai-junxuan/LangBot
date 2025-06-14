@@ -9,6 +9,7 @@ from langbot_plugin.runtime.io.connection import Connection
 from langbot_plugin.entities.io.actions.enums import (
     CommonAction,
     RuntimeToLangBotAction,
+    LangBotToRuntimeAction,
 )
 
 from ..entity.persistence import plugin as persistence_plugin
@@ -62,3 +63,13 @@ class RuntimeConnectionHandler(handler.Handler):
             {},
             timeout=10,
         )
+
+    async def list_plugins(self) -> list[dict[str, Any]]:
+        """List plugins"""
+        result = await self.call_action(
+            LangBotToRuntimeAction.LIST_PLUGINS,
+            {},
+            timeout=10,
+        )
+
+        return result['plugins']

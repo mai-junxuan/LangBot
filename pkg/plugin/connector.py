@@ -11,6 +11,7 @@ from ..utils import platform
 from langbot_plugin.runtime.io.controllers.stdio import client as stdio_client_controller
 from langbot_plugin.runtime.io.connections import stdio as stdio_connection
 from langbot_plugin.runtime.io.controllers.ws import client as ws_client_controller
+from langbot_plugin.api.entities import events, context
 
 
 class PluginRuntimeConnector:
@@ -58,8 +59,11 @@ class PluginRuntimeConnector:
 
         asyncio.create_task(task)
 
-    async def run(self):
+    async def initialize_plugins(self):
         pass
 
-    async def initialize_plugins(self):
+    async def emit_event(
+        self,
+        event: events.BaseEventModel,
+    ) -> context.EventContext:
         pass

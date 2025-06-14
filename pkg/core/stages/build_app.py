@@ -4,7 +4,6 @@ from __future__ import annotations
 from .. import stage, app
 from ...utils import version, proxy, announce
 from ...pipeline import pool, controller, pipelinemgr
-from ...plugin import manager as plugin_mgr
 from ...plugin import connector as plugin_connector
 from ...command import cmdmgr
 from ...provider.session import sessionmgr as llm_session_mgr
@@ -59,11 +58,6 @@ class BuildAppStage(stage.BootingStage):
         persistence_mgr_inst = persistencemgr.PersistenceManager(ap)
         ap.persistence_mgr = persistence_mgr_inst
         await persistence_mgr_inst.initialize()
-
-        plugin_mgr_inst = plugin_mgr.PluginManager(ap)
-        await plugin_mgr_inst.initialize()
-        ap.plugin_mgr = plugin_mgr_inst
-        await plugin_mgr_inst.load_plugins()
 
         plugin_connector_inst = plugin_connector.PluginRuntimeConnector(ap)
         await plugin_connector_inst.initialize()
