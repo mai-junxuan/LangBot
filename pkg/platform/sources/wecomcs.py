@@ -9,7 +9,6 @@ from libs.wecom_customer_service_api.api import WecomCSClient
 from pkg.platform.adapter import MessagePlatformAdapter
 from pkg.platform.types import events as platform_events, message as platform_message
 from libs.wecom_customer_service_api.wecomcsevent import WecomCSEvent
-from pkg.core import app
 from .. import adapter
 from ..types import entities as platform_entities
 from ...command.errors import ParamNotEnoughError
@@ -119,15 +118,13 @@ class WecomEventConverter:
 
 class WecomCSAdapter(adapter.MessagePlatformAdapter):
     bot: WecomCSClient
-    ap: app.Application
     bot_account_id: str
     message_converter: WecomMessageConverter = WecomMessageConverter()
     event_converter: WecomEventConverter = WecomEventConverter()
     config: dict
 
-    def __init__(self, config: dict, ap: app.Application, logger: EventLogger):
+    def __init__(self, config: dict, logger: EventLogger):
         self.config = config
-        self.ap = ap
         self.logger = logger
 
         required_keys = [

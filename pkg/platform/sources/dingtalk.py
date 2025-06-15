@@ -4,7 +4,6 @@ from libs.dingtalk_api.dingtalkevent import DingTalkEvent
 from pkg.platform.types import message as platform_message
 from pkg.platform.adapter import MessagePlatformAdapter
 from .. import adapter
-from ...core import app
 from ..types import events as platform_events
 from ..types import entities as platform_entities
 from libs.dingtalk_api.api import DingTalkClient
@@ -94,15 +93,13 @@ class DingTalkEventConverter(adapter.EventConverter):
 
 class DingTalkAdapter(adapter.MessagePlatformAdapter):
     bot: DingTalkClient
-    ap: app.Application
     bot_account_id: str
     message_converter: DingTalkMessageConverter = DingTalkMessageConverter()
     event_converter: DingTalkEventConverter = DingTalkEventConverter()
     config: dict
 
-    def __init__(self, config: dict, ap: app.Application, logger: EventLogger):
+    def __init__(self, config: dict, logger: EventLogger):
         self.config = config
-        self.ap = ap
         self.logger = logger
         required_keys = [
             'client_id',

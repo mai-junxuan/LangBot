@@ -3,7 +3,7 @@ from __future__ import annotations
 import enum
 import typing
 
-import pydantic.v1 as pydantic
+import pydantic
 
 from ..provider import entities as llm_entities
 from ..platform import adapter as msadapter
@@ -20,23 +20,13 @@ class LifecycleControlScope(enum.Enum):
     PROVIDER = 'provider'
 
 
-class LauncherTypes(enum.Enum):
-    """一个请求的发起者类型"""
-
-    PERSON = 'person'
-    """私聊"""
-
-    GROUP = 'group'
-    """群聊"""
-
-
 class Query(pydantic.BaseModel):
     """一次请求的信息封装"""
 
     query_id: int
     """请求ID，添加进请求池时生成"""
 
-    launcher_type: LauncherTypes
+    launcher_type: provider_session.LauncherTypes
     """会话类型，platform处理阶段设置"""
 
     launcher_id: typing.Union[int, str]

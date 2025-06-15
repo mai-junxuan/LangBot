@@ -3,10 +3,10 @@ from __future__ import annotations
 import datetime
 
 from .. import stage, entities
-from ...core import entities as core_entities
 from langbot_plugin.api.entities.builtin.provider import message as provider_message
 from ...plugin import events
 from ...platform.types import message as platform_message
+import langbot_plugin.api.entities.builtin.pipeline.query as pipeline_query
 
 
 @stage.stage_class('PreProcessor')
@@ -26,7 +26,7 @@ class PreProcessor(stage.PipelineStage):
 
     async def process(
         self,
-        query: core_entities.Query,
+        query: pipeline_query.Query,
         stage_inst_name: str,
     ) -> entities.StageProcessResult:
         """处理"""

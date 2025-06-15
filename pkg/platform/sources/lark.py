@@ -19,7 +19,6 @@ import quart
 from lark_oapi.api.im.v1 import *
 
 from .. import adapter
-from ...core import app
 from ..types import message as platform_message
 from ..types import events as platform_events
 from ..types import entities as platform_entities
@@ -337,11 +336,9 @@ class LarkAdapter(adapter.MessagePlatformAdapter):
 
     config: dict
     quart_app: quart.Quart
-    ap: app.Application
 
-    def __init__(self, config: dict, ap: app.Application, logger: EventLogger):
+    def __init__(self, config: dict, logger: EventLogger):
         self.config = config
-        self.ap = ap
         self.logger = logger
         self.quart_app = quart.Quart(__name__)
         self.listeners = {}
@@ -350,8 +347,6 @@ class LarkAdapter(adapter.MessagePlatformAdapter):
         async def lark_callback():
             try:
                 data = await quart.request.json
-
-                self.ap.logger.debug(f'Lark callback event: {data}')
 
                 if 'encrypt' in data:
                     cipher = AESCipher(self.config['encrypt-key'])

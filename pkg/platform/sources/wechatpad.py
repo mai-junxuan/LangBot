@@ -454,6 +454,8 @@ class WeChatPadAdapter(adapter.MessagePlatformAdapter):
 
     ap: app.Application
 
+    logger: EventLogger
+
     message_converter: WeChatPadMessageConverter
     event_converter: WeChatPadEventConverter
 
@@ -473,8 +475,6 @@ class WeChatPadAdapter(adapter.MessagePlatformAdapter):
 
     async def ws_message(self, data):
         """处理接收到的消息"""
-        # self.ap.logger.debug(f"Gewechat callback event: {data}")
-        # print(data)
 
         try:
             event = await self.event_converter.target2yiri(data.copy(), self.bot_account_id)
@@ -537,9 +537,8 @@ class WeChatPadAdapter(adapter.MessagePlatformAdapter):
 
             if handler := handler_map.get(msg['type']):
                 handler(msg)
-                # self.ap.logger.warning(f"未处理的消息类型: {ret}")
             else:
-                self.ap.logger.warning(f'未处理的消息类型: {msg["type"]}')
+                print(f'未处理的消息类型: {msg["type"]}')
                 continue
 
     async def send_message(self, target_type: str, target_id: str, message: platform_message.MessageChain):
@@ -581,7 +580,6 @@ class WeChatPadAdapter(adapter.MessagePlatformAdapter):
             if self.config['token']:
                 self.bot = WeChatPadClient(self.config['wechatpad_url'], self.config['token'])
                 data = self.bot.get_login_status()
-                self.ap.logger.info(data)
                 if data['Code'] == 300 and data['Text'] == '你已退出微信':
                     response = requests.post(
                         f'{self.config["wechatpad_url"]}/admin/GenAuthKey1?key={self.config["admin_key"]}',
@@ -601,7 +599,7 @@ class WeChatPadAdapter(adapter.MessagePlatformAdapter):
                 self.config['token'] = response.json()['Data'][0]
 
         self.bot = WeChatPadClient(self.config['wechatpad_url'], self.config['token'], logger=self.logger)
-        self.ap.logger.info(self.config['token'])
+        await self.logger.info(self.config['token'])
         thread_1 = threading.Event()
 
         def wechat_login_process():
@@ -609,10 +607,9 @@ class WeChatPadAdapter(adapter.MessagePlatformAdapter):
             # login_data =self.bot.get_login_qr()
 
             # url = login_data['Data']["QrCodeUrl"]
-            # self.ap.logger.info(login_data)
 
             profile = self.bot.get_profile()
-            self.ap.logger.info(profile)
+            self.logger.info(profile)
 
             self.bot_account_id = profile['Data']['userInfo']['nickName']['str']
             self.config['wxid'] = profile['Data']['userInfo']['userName']['str']
@@ -624,27 +621,26 @@ class WeChatPadAdapter(adapter.MessagePlatformAdapter):
         def connect_websocket_sync() -> None:
             thread_1.wait()
             uri = f'{self.config["wechatpad_ws"]}/GetSyncMsg?key={self.config["token"]}'
-            self.ap.logger.info(f'Connecting to WebSocket: {uri}')
+            print(f'Connecting to WebSocket: {uri}')
 
             def on_message(ws, message):
                 try:
                     data = json.loads(message)
-                    self.ap.logger.debug(f'Received message: {data}')
                     # 这里需要确保ws_message是同步的，或者使用asyncio.run调用异步方法
                     asyncio.run(self.ws_message(data))
                 except json.JSONDecodeError:
-                    self.ap.logger.error(f'Non-JSON message: {message[:100]}...')
+                    print(f'Non-JSON message: {message[:100]}...')
 
             def on_error(ws, error):
-                self.ap.logger.error(f'WebSocket error: {str(error)[:200]}')
+                print(f'WebSocket error: {str(error)[:200]}')
 
             def on_close(ws, close_status_code, close_msg):
-                self.ap.logger.info('WebSocket closed, reconnecting...')
+                print('WebSocket closed, reconnecting...')
                 time.sleep(5)
                 connect_websocket_sync()  # 自动重连
 
             def on_open(ws):
-                self.ap.logger.info('WebSocket connected successfully!')
+                print('WebSocket connected successfully!')
 
             ws = websocket.WebSocketApp(
                 uri, on_message=on_message, on_error=on_error, on_close=on_close, on_open=on_open
@@ -655,10 +651,9 @@ class WeChatPadAdapter(adapter.MessagePlatformAdapter):
         # connect_websocket_sync()
 
         # 这行代码会在WebSocket连接断开后才会执行
-        # self.ap.logger.info("WebSocket client thread started")
         thread = threading.Thread(target=connect_websocket_sync, name='WebSocketClientThread', daemon=True)
         thread.start()
-        self.ap.logger.info('WebSocket client thread started')
+        self.logger.info('WebSocket client thread started')
 
     async def kill(self) -> bool:
         pass

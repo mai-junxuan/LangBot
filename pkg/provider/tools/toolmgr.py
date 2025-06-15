@@ -2,11 +2,12 @@ from __future__ import annotations
 
 import typing
 
-from ...core import app, entities as core_entities
+from ...core import app
 from . import loader as tools_loader
 from ...utils import importutil
 from . import loaders
 import langbot_plugin.api.entities.builtin.resource.tool as resource_tool
+import langbot_plugin.api.entities.builtin.pipeline.query as pipeline_query
 
 importutil.import_modules_in_pkg(loaders)
 
@@ -90,7 +91,7 @@ class ToolManager:
 
         return tools
 
-    async def execute_func_call(self, query: core_entities.Query, name: str, parameters: dict) -> typing.Any:
+    async def execute_func_call(self, query: pipeline_query.Query, name: str, parameters: dict) -> typing.Any:
         """执行函数调用"""
 
         for loader in self.loaders:

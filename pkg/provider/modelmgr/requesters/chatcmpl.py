@@ -8,9 +8,9 @@ import openai.types.chat.chat_completion as chat_completion
 import httpx
 
 from .. import errors, requester
-from ....core import entities as core_entities
 from ... import entities as llm_entities
 import langbot_plugin.api.entities.builtin.resource.tool as resource_tool
+import langbot_plugin.api.entities.builtin.pipeline.query as pipeline_query
 
 
 class OpenAIChatCompletions(requester.LLMAPIRequester):
@@ -60,7 +60,7 @@ class OpenAIChatCompletions(requester.LLMAPIRequester):
 
     async def _closure(
         self,
-        query: core_entities.Query,
+        query: pipeline_query.Query,
         req_messages: list[dict],
         use_model: requester.RuntimeLLMModel,
         use_funcs: list[resource_tool.LLMTool] = None,
@@ -101,7 +101,7 @@ class OpenAIChatCompletions(requester.LLMAPIRequester):
 
     async def invoke_llm(
         self,
-        query: core_entities.Query,
+        query: pipeline_query.Query,
         model: requester.RuntimeLLMModel,
         messages: typing.List[llm_entities.Message],
         funcs: typing.List[resource_tool.LLMTool] = None,

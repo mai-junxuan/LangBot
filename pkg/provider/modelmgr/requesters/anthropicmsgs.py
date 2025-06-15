@@ -9,10 +9,10 @@ import httpx
 
 from .. import errors, requester
 
-from ....core import entities as core_entities
 from ... import entities as llm_entities
 from ....utils import image
 import langbot_plugin.api.entities.builtin.resource.tool as resource_tool
+import langbot_plugin.api.entities.builtin.pipeline.query as pipeline_query
 
 
 class AnthropicMessages(requester.LLMAPIRequester):
@@ -48,7 +48,7 @@ class AnthropicMessages(requester.LLMAPIRequester):
 
     async def invoke_llm(
         self,
-        query: core_entities.Query,
+        query: pipeline_query.Query,
         model: requester.RuntimeLLMModel,
         messages: typing.List[llm_entities.Message],
         funcs: typing.List[resource_tool.LLMTool] = None,

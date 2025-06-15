@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import asyncio
 
-from ...core import app, entities as core_entities
+from ...core import app
 from langbot_plugin.api.entities.builtin.provider import message as provider_message, prompt as provider_prompt
 import langbot_plugin.api.entities.builtin.provider.session as provider_session
+import langbot_plugin.api.entities.builtin.pipeline.query as pipeline_query
 
 
 class SessionManager:
@@ -21,7 +22,7 @@ class SessionManager:
     async def initialize(self):
         pass
 
-    async def get_session(self, query: core_entities.Query) -> provider_session.Session:
+    async def get_session(self, query: pipeline_query.Query) -> provider_session.Session:
         """获取会话"""
         for session in self.session_list:
             if query.launcher_type == session.launcher_type and query.launcher_id == session.launcher_id:
@@ -39,7 +40,7 @@ class SessionManager:
 
     async def get_conversation(
         self,
-        query: core_entities.Query,
+        query: pipeline_query.Query,
         session: provider_session.Session,
         prompt_config: list[dict],
         pipeline_uuid: str,

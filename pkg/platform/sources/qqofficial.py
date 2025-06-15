@@ -8,7 +8,6 @@ import datetime
 from pkg.platform.adapter import MessagePlatformAdapter
 from pkg.platform.types import events as platform_events, message as platform_message
 from .. import adapter
-from ...core import app
 from ..types import entities as platform_entities
 from ...command.errors import ParamNotEnoughError
 from libs.qq_official_api.api import QQOfficialClient
@@ -134,15 +133,13 @@ class QQOfficialEventConverter(adapter.EventConverter):
 
 class QQOfficialAdapter(adapter.MessagePlatformAdapter):
     bot: QQOfficialClient
-    ap: app.Application
     config: dict
     bot_account_id: str
     message_converter: QQOfficialMessageConverter = QQOfficialMessageConverter()
     event_converter: QQOfficialEventConverter = QQOfficialEventConverter()
 
-    def __init__(self, config: dict, ap: app.Application, logger: EventLogger):
+    def __init__(self, config: dict, logger: EventLogger):
         self.config = config
-        self.ap = ap
         self.logger = logger
 
         required_keys = [

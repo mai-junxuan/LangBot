@@ -9,12 +9,12 @@ import traceback
 import nakuru
 import nakuru.entities.components as nkc
 
-from .. import adapter as adapter_model
-from ...pipeline.longtext.strategies import forward
-from ...platform.types import message as platform_message
-from ...platform.types import entities as platform_entities
-from ...platform.types import events as platform_events
-from ..logger import EventLogger
+from ... import adapter as adapter_model
+from ....pipeline.longtext.strategies import forward
+from ...types import message as platform_message
+from ...types import entities as platform_entities
+from ...types import events as platform_events
+from ...logger import EventLogger
 
 
 class NakuruProjectMessageConverter(adapter_model.MessageConverter):
@@ -262,7 +262,7 @@ class NakuruAdapter(adapter_model.MessagePlatformAdapter):
             source_cls = NakuruProjectEventConverter.yiri2target(event_type)
 
             # 包装函数
-            async def listener_wrapper(app: nakuru.CQHTTP, source: source_cls):
+            async def listener_wrapper(app: nakuru.CQHTTP, source: source_cls):  # type: ignore
                 await callback(self.event_converter.target2yiri(source), self)
 
             # 将包装函数和原函数的对应关系存入列表
@@ -322,7 +322,6 @@ class NakuruAdapter(adapter_model.MessagePlatformAdapter):
         except Exception:
             raise Exception('获取go-cqhttp账号信息失败, 请检查是否已启动go-cqhttp并配置正确')
         await self.bot._run()
-        self.ap.logger.info('运行 Nakuru 适配器')
         while True:
             await asyncio.sleep(1)
 

@@ -4,9 +4,9 @@ import typing
 
 from . import chatcmpl
 from .. import errors, requester
-from ....core import entities as core_entities
 from ... import entities as llm_entities
 import langbot_plugin.api.entities.builtin.resource.tool as resource_tool
+import langbot_plugin.api.entities.builtin.pipeline.query as pipeline_query
 
 
 class DeepseekChatCompletions(chatcmpl.OpenAIChatCompletions):
@@ -19,7 +19,7 @@ class DeepseekChatCompletions(chatcmpl.OpenAIChatCompletions):
 
     async def _closure(
         self,
-        query: core_entities.Query,
+        query: pipeline_query.Query,
         req_messages: list[dict],
         use_model: requester.RuntimeLLMModel,
         use_funcs: list[resource_tool.LLMTool] = None,

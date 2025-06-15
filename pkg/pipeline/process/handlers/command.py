@@ -4,16 +4,17 @@ import typing
 
 from .. import handler
 from ... import entities
-from ....core import entities as core_entities
 from langbot_plugin.api.entities.builtin.provider import message as provider_message
 from ....plugin import events
 from ....platform.types import message as platform_message
+import langbot_plugin.api.entities.builtin.provider.session as provider_session
+import langbot_plugin.api.entities.builtin.pipeline.query as pipeline_query
 
 
 class CommandHandler(handler.MessageHandler):
     async def handle(
         self,
-        query: core_entities.Query,
+        query: pipeline_query.Query,
     ) -> typing.AsyncGenerator[entities.StageProcessResult, None]:
         """处理"""
 
@@ -28,7 +29,7 @@ class CommandHandler(handler.MessageHandler):
 
         event_class = (
             events.PersonCommandSent
-            if query.launcher_type == core_entities.LauncherTypes.PERSON
+            if query.launcher_type == provider_session.LauncherTypes.PERSON
             else events.GroupCommandSent
         )
 

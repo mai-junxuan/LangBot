@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import typing
 
-import pydantic.v1 as pydantic
+import pydantic
 
 import langbot_plugin.api.entities.builtin.provider.session as provider_session
-from ..core import entities as core_entities
 from . import errors
 from ..platform.types import message as platform_message
+import langbot_plugin.api.entities.builtin.pipeline.query as pipeline_query
 
 
 class CommandReturn(pydantic.BaseModel):
@@ -35,7 +35,7 @@ class CommandReturn(pydantic.BaseModel):
 class ExecuteContext(pydantic.BaseModel):
     """单次命令执行上下文"""
 
-    query: core_entities.Query
+    query: pipeline_query.Query
     """本次消息的请求对象"""
 
     session: provider_session.Session

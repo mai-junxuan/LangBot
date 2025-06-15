@@ -4,15 +4,15 @@ import json
 import typing
 
 from .. import runner
-from ...core import entities as core_entities
 from .. import entities as llm_entities
+import langbot_plugin.api.entities.builtin.pipeline.query as pipeline_query
 
 
 @runner.runner_class('local-agent')
 class LocalAgentRunner(runner.RequestRunner):
     """本地Agent请求运行器"""
 
-    async def run(self, query: core_entities.Query) -> typing.AsyncGenerator[llm_entities.Message, None]:
+    async def run(self, query: pipeline_query.Query) -> typing.AsyncGenerator[llm_entities.Message, None]:
         """运行请求"""
         pending_tool_calls = []
 

@@ -10,7 +10,6 @@ from libs.official_account_api.oaevent import OAEvent
 from libs.official_account_api.api import OAClient
 from libs.official_account_api.api import OAClientForLongerResponse
 from .. import adapter
-from ...core import app
 from ..types import entities as platform_entities
 from ...command.errors import ParamNotEnoughError
 from ..logger import EventLogger
@@ -58,15 +57,13 @@ class OAEventConverter(adapter.EventConverter):
 
 class OfficialAccountAdapter(adapter.MessagePlatformAdapter):
     bot: OAClient | OAClientForLongerResponse
-    ap: app.Application
     bot_account_id: str
     message_converter: OAMessageConverter = OAMessageConverter()
     event_converter: OAEventConverter = OAEventConverter()
     config: dict
 
-    def __init__(self, config: dict, ap: app.Application, logger: EventLogger):
+    def __init__(self, config: dict, logger: EventLogger):
         self.config = config
-        self.ap = ap
         self.logger = logger
 
         required_keys = [

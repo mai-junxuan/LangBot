@@ -6,10 +6,10 @@ import importlib
 import traceback
 
 from .. import loader, events, context, models
-from ...core import entities as core_entities
 from langbot_plugin.api.entities.builtin.resource import tool as resource_tool
 from ...utils import funcschema
 from ...discover import engine as discover_engine
+import langbot_plugin.api.entities.builtin.pipeline.query as pipeline_query
 
 
 class PluginLoader(loader.PluginLoader):
@@ -98,7 +98,7 @@ class PluginLoader(loader.PluginLoader):
             function_schema = funcschema.get_func_schema(func)
             function_name = self._current_container.plugin_name + '-' + (func.__name__ if name is None else name)
 
-            async def handler(plugin: context.BasePlugin, query: core_entities.Query, *args, **kwargs):
+            async def handler(plugin: context.BasePlugin, query: pipeline_query.Query, *args, **kwargs):
                 return func(*args, **kwargs)
 
             llm_function = resource_tool.LLMTool(

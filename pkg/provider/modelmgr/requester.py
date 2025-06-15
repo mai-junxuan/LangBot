@@ -4,11 +4,11 @@ import abc
 import typing
 
 from ...core import app
-from ...core import entities as core_entities
 from .. import entities as llm_entities
 from ...entity.persistence import model as persistence_model
 import langbot_plugin.api.entities.builtin.resource.tool as resource_tool
 from . import token
+import langbot_plugin.api.entities.builtin.pipeline.query as pipeline_query
 
 
 class RuntimeLLMModel:
@@ -56,7 +56,7 @@ class LLMAPIRequester(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     async def invoke_llm(
         self,
-        query: core_entities.Query,
+        query: pipeline_query.Query,
         model: RuntimeLLMModel,
         messages: typing.List[llm_entities.Message],
         funcs: typing.List[resource_tool.LLMTool] = None,

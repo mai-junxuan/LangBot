@@ -4,9 +4,9 @@ import typing
 import traceback
 
 from .. import loader
-from ....core import entities as core_entities
 from ....plugin import context as plugin_context
 import langbot_plugin.api.entities.builtin.resource.tool as resource_tool
+import langbot_plugin.api.entities.builtin.pipeline.query as pipeline_query
 
 
 @loader.loader_class('plugin-tool-loader')
@@ -49,7 +49,7 @@ class PluginToolLoader(loader.ToolLoader):
                     return function, plugin.plugin_inst
         return None, None
 
-    async def invoke_tool(self, query: core_entities.Query, name: str, parameters: dict) -> typing.Any:
+    async def invoke_tool(self, query: pipeline_query.Query, name: str, parameters: dict) -> typing.Any:
         try:
             function, plugin = await self._get_function_and_plugin(name)
             if function is None:
