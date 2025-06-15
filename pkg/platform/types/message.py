@@ -800,12 +800,14 @@ class File(MessageComponent):
 
     type: str = 'File'
     """消息组件类型。"""
-    id: str
+    id: str = ''
     """文件识别 ID。"""
     name: str
     """文件名称。"""
-    size: int
+    size: int = ''
     """文件大小。"""
+    url: str
+    """文件路径"""
 
     def __str__(self):
         return f'[文件]{self.name}'
@@ -922,3 +924,22 @@ class WeChatForwardQuote(MessageComponent):
 
     def __str__(self):
         return self.app_msg
+
+
+class WeChatFile(MessageComponent):
+    """文件。"""
+
+    type: str = 'File'
+    """消息组件类型。"""
+    file_id: str = ''
+    """文件识别 ID。"""
+    file_name: str = ''
+    """文件名称。"""
+    file_size: int = ''
+    """文件大小。"""
+    file_path: str = ''
+    """文件地址"""
+    file_base64: str = ''
+    """base64"""
+    def __str__(self):
+        return f'[文件]{self.file_name}'

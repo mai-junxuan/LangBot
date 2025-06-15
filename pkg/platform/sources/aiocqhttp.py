@@ -59,6 +59,9 @@ class AiocqhttpMessageConverter(adapter.MessageConverter):
             elif type(msg) is platform_message.Forward:
                 for node in msg.node_list:
                     msg_list.extend((await AiocqhttpMessageConverter.yiri2target(node.message_chain))[0])
+            elif isinstance(msg, platform_message.File):
+                msg_list.append({"type":"file", "data":{'file': msg.url, "name": msg.name}})
+
 
             else:
                 msg_list.append(aiocqhttp.MessageSegment.text(str(msg)))
@@ -131,6 +134,16 @@ class AiocqhttpMessageConverter(adapter.MessageConverter):
                 )
                 yiri_msg_list.append(reply_msg)
 
+            elif msg.type == 'file':
+                # file_name = msg.data['file']
+                file_id = msg.data['file_id']
+                file_data = await bot.get_file(file_id=file_id)
+                file_name = file_data.get('file_name')
+                file_path = file_data.get('file')
+                file_url = file_data.get('file_url')
+                file_size = file_data.get('file_size')
+                yiri_msg_list.append(platform_message.File(id=file_id, name=file_name,url=file_url,size=file_size))
+        
         chain = platform_message.MessageChain(yiri_msg_list)
 
         return chain
@@ -220,6 +233,7 @@ class AiocqhttpAdapter(adapter.MessagePlatformAdapter):
         aiocq_msg = (await AiocqhttpMessageConverter.yiri2target(message))[0]
 
         if target_type == 'group':
+
             await self.bot.send_group_msg(group_id=int(target_id), message=aiocq_msg)
         elif target_type == 'person':
             await self.bot.send_private_msg(user_id=int(target_id), message=aiocq_msg)
