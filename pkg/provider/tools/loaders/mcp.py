@@ -7,8 +7,9 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 from mcp.client.sse import sse_client
 
-from .. import loader, entities as tools_entities
+from .. import loader
 from ....core import app, entities as core_entities
+import langbot_plugin.api.entities.builtin.resource.tool as resource_tool
 
 
 class RuntimeMCPSession:
@@ -24,7 +25,7 @@ class RuntimeMCPSession:
 
     exit_stack: AsyncExitStack
 
-    functions: list[tools_entities.LLMFunction] = []
+    functions: list[resource_tool.LLMTool] = []
 
     def __init__(self, server_name: str, server_config: dict, ap: app.Application):
         self.server_name = server_name
@@ -91,7 +92,7 @@ class RuntimeMCPSession:
             func.__name__ = tool.name
 
             self.functions.append(
-                tools_entities.LLMFunction(
+                resource_tool.LLMTool(
                     name=tool.name,
                     human_desc=tool.description,
                     description=tool.description,
@@ -114,7 +115,7 @@ class MCPLoader(loader.ToolLoader):
 
     sessions: dict[str, RuntimeMCPSession] = {}
 
-    _last_listed_functions: list[tools_entities.LLMFunction] = []
+    _last_listed_functions: list[resource_tool.LLMTool] = []
 
     def __init__(self, ap: app.Application):
         super().__init__(ap)
@@ -130,7 +131,7 @@ class MCPLoader(loader.ToolLoader):
             # self.ap.event_loop.create_task(session.initialize())
             self.sessions[server_config['name']] = session
 
-    async def get_tools(self, enabled: bool = True) -> list[tools_entities.LLMFunction]:
+    async def get_tools(self, enabled: bool = True) -> list[resource_tool.LLMTool]:
         all_functions = []
 
         for session in self.sessions.values():

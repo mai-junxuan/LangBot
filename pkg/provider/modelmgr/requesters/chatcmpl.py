@@ -10,7 +10,7 @@ import httpx
 from .. import errors, requester
 from ....core import entities as core_entities
 from ... import entities as llm_entities
-from ...tools import entities as tools_entities
+import langbot_plugin.api.entities.builtin.resource.tool as resource_tool
 
 
 class OpenAIChatCompletions(requester.LLMAPIRequester):
@@ -63,7 +63,7 @@ class OpenAIChatCompletions(requester.LLMAPIRequester):
         query: core_entities.Query,
         req_messages: list[dict],
         use_model: requester.RuntimeLLMModel,
-        use_funcs: list[tools_entities.LLMFunction] = None,
+        use_funcs: list[resource_tool.LLMTool] = None,
         extra_args: dict[str, typing.Any] = {},
     ) -> llm_entities.Message:
         self.client.api_key = use_model.token_mgr.get_token()
@@ -104,7 +104,7 @@ class OpenAIChatCompletions(requester.LLMAPIRequester):
         query: core_entities.Query,
         model: requester.RuntimeLLMModel,
         messages: typing.List[llm_entities.Message],
-        funcs: typing.List[tools_entities.LLMFunction] = None,
+        funcs: typing.List[resource_tool.LLMTool] = None,
         extra_args: dict[str, typing.Any] = {},
     ) -> llm_entities.Message:
         req_messages = []  # req_messages 仅用于类内，外部同步由 query.messages 进行

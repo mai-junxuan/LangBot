@@ -22,7 +22,7 @@ class DingTalkMessageConverter(adapter.MessageConverter):
                 at = True
             if type(msg) is platform_message.Plain:
                 content += msg.text
-        return content,at
+        return content, at
 
     @staticmethod
     async def target2yiri(event: DingTalkEvent, bot_name: str):
@@ -136,8 +136,8 @@ class DingTalkAdapter(adapter.MessagePlatformAdapter):
         )
         incoming_message = event.incoming_message
 
-        content,at = await DingTalkMessageConverter.yiri2target(message)
-        await self.bot.send_message(content, incoming_message,at)
+        content, at = await DingTalkMessageConverter.yiri2target(message)
+        await self.bot.send_message(content, incoming_message, at)
 
     async def send_message(self, target_type: str, target_id: str, message: platform_message.MessageChain):
         content = await DingTalkMessageConverter.yiri2target(message)
@@ -157,8 +157,8 @@ class DingTalkAdapter(adapter.MessagePlatformAdapter):
                     await self.event_converter.target2yiri(event, self.config['robot_name']),
                     self,
                 )
-            except Exception as e:
-                await self.logger.error(f"Error in dingtalk callback: {traceback.format_exc()}")
+            except Exception:
+                await self.logger.error(f'Error in dingtalk callback: {traceback.format_exc()}')
 
         if event_type == platform_events.FriendMessage:
             self.bot.on_message('FriendMessage')(on_message)

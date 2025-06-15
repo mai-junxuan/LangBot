@@ -5,6 +5,7 @@ import typing
 from ..core import app, entities as core_entities
 from . import entities, operator, errors
 from ..utils import importutil
+import langbot_plugin.api.entities.builtin.provider.session as provider_session
 
 # 引入所有算子以便注册
 from . import operators
@@ -90,7 +91,7 @@ class CommandManager:
         self,
         command_text: str,
         query: core_entities.Query,
-        session: core_entities.Session,
+        session: provider_session.Session,
     ) -> typing.AsyncGenerator[entities.CommandReturn, None]:
         """执行命令"""
 

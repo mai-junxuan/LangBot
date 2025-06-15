@@ -7,6 +7,7 @@ import pydantic.v1 as pydantic
 from ..core import entities as core_entities
 from ..provider import entities as llm_entities
 from ..platform.types import message as platform_message
+import langbot_plugin.api.entities.builtin.provider.session as provider_session
 
 
 class BaseEventModel(pydantic.BaseModel):
@@ -139,7 +140,7 @@ class NormalMessageResponded(BaseEventModel):
 
     sender_id: typing.Union[int, str]
 
-    session: core_entities.Session
+    session: provider_session.Session
     """会话对象"""
 
     prefix: str

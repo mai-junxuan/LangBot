@@ -136,7 +136,7 @@ class RuntimePipeline:
         while i < len(self.stage_containers):
             stage_container = self.stage_containers[i]
 
-            query.current_stage = stage_container  # 标记到 Query 对象里
+            query.current_stage_name = stage_container.inst_name  # 标记到 Query 对象里
 
             result = stage_container.inst.process(query, stage_container.inst_name)
 
@@ -196,7 +196,7 @@ class RuntimePipeline:
 
             await self._execute_from_stage(0, query)
         except Exception as e:
-            inst_name = query.current_stage.inst_name if query.current_stage else 'unknown'
+            inst_name = query.current_stage_name if query.current_stage_name else 'unknown'
             self.ap.logger.error(f'处理请求时出错 query_id={query.query_id} stage={inst_name} : {e}')
             self.ap.logger.error(f'Traceback: {traceback.format_exc()}')
         finally:

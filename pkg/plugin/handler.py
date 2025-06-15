@@ -73,3 +73,18 @@ class RuntimeConnectionHandler(handler.Handler):
         )
 
         return result['plugins']
+
+    async def emit_event(
+        self,
+        event_context: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Emit event"""
+        result = await self.call_action(
+            LangBotToRuntimeAction.EMIT_EVENT,
+            {
+                'event_context': event_context,
+            },
+            timeout=10,
+        )
+
+        return result['event_context']

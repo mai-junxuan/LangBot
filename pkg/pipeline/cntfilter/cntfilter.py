@@ -5,7 +5,7 @@ from ...core import app
 from .. import stage, entities
 from ...core import entities as core_entities
 from . import filter as filter_model, entities as filter_entities
-from ...provider import entities as llm_entities
+from langbot_plugin.api.entities.builtin.provider import message as provider_message
 from ...platform.types import message as platform_message
 from ...utils import importutil
 
@@ -140,7 +140,7 @@ class ContentFilterStage(stage.PipelineStage):
             return await self._pre_process(str(query.message_chain).strip(), query)
         elif stage_inst_name == 'PostContentFilterStage':
             # 仅处理 query.resp_messages[-1].content 是 str 的情况
-            if isinstance(query.resp_messages[-1], llm_entities.Message) and isinstance(
+            if isinstance(query.resp_messages[-1], provider_message.Message) and isinstance(
                 query.resp_messages[-1].content, str
             ):
                 return await self._post_process(query.resp_messages[-1].content, query)

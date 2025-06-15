@@ -4,6 +4,7 @@ import typing
 
 import pydantic.v1 as pydantic
 
+import langbot_plugin.api.entities.builtin.provider.session as provider_session
 from ..core import entities as core_entities
 from . import errors
 from ..platform.types import message as platform_message
@@ -37,7 +38,7 @@ class ExecuteContext(pydantic.BaseModel):
     query: core_entities.Query
     """本次消息的请求对象"""
 
-    session: core_entities.Session
+    session: provider_session.Session
     """本次消息所属的会话对象"""
 
     command_text: str

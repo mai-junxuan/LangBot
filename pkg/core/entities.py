@@ -2,17 +2,15 @@ from __future__ import annotations
 
 import enum
 import typing
-import datetime
-import asyncio
 
 import pydantic.v1 as pydantic
 
 from ..provider import entities as llm_entities
-from ..provider.modelmgr import requester
-from ..provider.tools import entities as tools_entities
 from ..platform import adapter as msadapter
 from ..platform.types import message as platform_message
 from ..platform.types import events as platform_events
+import langbot_plugin.api.entities.builtin.provider.session as provider_session
+import langbot_plugin.api.entities.builtin.resource.tool as resource_tool
 
 
 class LifecycleControlScope(enum.Enum):
@@ -65,7 +63,7 @@ class Query(pydantic.BaseModel):
     adapter: msadapter.MessagePlatformAdapter
     """消息平台适配器对象，单个app中可能启用了多个消息平台适配器，此对象表明发起此query的适配器"""
 
-    session: typing.Optional[Session] = None
+    session: typing.Optional[provider_session.Session] = None
     """会话对象，由前置处理器阶段设置"""
 
     messages: typing.Optional[list[llm_entities.Message]] = []
@@ -80,10 +78,10 @@ class Query(pydantic.BaseModel):
     variables: typing.Optional[dict[str, typing.Any]] = None
     """变量，由前置处理器阶段设置。在prompt中嵌入或由 Runner 传递到 LLMOps 平台。"""
 
-    use_llm_model: typing.Optional[requester.RuntimeLLMModel] = None
+    use_llm_model_uuid: typing.Optional[str] = None
     """使用的对话模型，由前置处理器阶段设置"""
 
-    use_funcs: typing.Optional[list[tools_entities.LLMFunction]] = None
+    use_funcs: typing.Optional[list[resource_tool.LLMTool]] = None
     """使用的函数，由前置处理器阶段设置"""
 
     resp_messages: (
@@ -95,7 +93,7 @@ class Query(pydantic.BaseModel):
     """回复消息链，从resp_messages包装而得"""
 
     # ======= 内部保留 =======
-    current_stage: typing.Optional['pkg.pipeline.pipelinemgr.StageInstContainer'] = None
+    current_stage_name: typing.Optional[str] = None
     """当前所处阶段"""
 
     class Config:
@@ -120,57 +118,3 @@ class Query(pydantic.BaseModel):
         if self.variables is None:
             return {}
         return self.variables
-
-
-class Conversation(pydantic.BaseModel):
-    """对话，包含于 Session 中，一个 Session 可以有多个历史 Conversation，但只有一个当前使用的 Conversation"""
-
-    prompt: llm_entities.Prompt
-
-    messages: list[llm_entities.Message]
-
-    create_time: typing.Optional[datetime.datetime] = pydantic.Field(default_factory=datetime.datetime.now)
-
-    update_time: typing.Optional[datetime.datetime] = pydantic.Field(default_factory=datetime.datetime.now)
-
-    use_llm_model: typing.Optional[requester.RuntimeLLMModel] = None
-
-    use_funcs: typing.Optional[list[tools_entities.LLMFunction]]
-
-    pipeline_uuid: str
-    """流水线UUID。"""
-
-    bot_uuid: str
-    """机器人UUID。"""
-
-    uuid: typing.Optional[str] = None
-    """该对话的 uuid，在创建时不会自动生成。而是当使用 Dify API 等由外部管理对话信息的服务时，用于绑定外部的会话。具体如何使用，取决于 Runner。"""
-
-    class Config:
-        arbitrary_types_allowed = True
-
-
-class Session(pydantic.BaseModel):
-    """会话，一个 Session 对应一个 {launcher_type.value}_{launcher_id}"""
-
-    launcher_type: LauncherTypes
-
-    launcher_id: typing.Union[int, str]
-
-    sender_id: typing.Optional[typing.Union[int, str]] = 0
-
-    use_prompt_name: typing.Optional[str] = 'default'
-
-    using_conversation: typing.Optional[Conversation] = None
-
-    conversations: typing.Optional[list[Conversation]] = pydantic.Field(default_factory=list)
-
-    create_time: typing.Optional[datetime.datetime] = pydantic.Field(default_factory=datetime.datetime.now)
-
-    update_time: typing.Optional[datetime.datetime] = pydantic.Field(default_factory=datetime.datetime.now)
-
-    semaphore: typing.Optional[asyncio.Semaphore] = None
-    """当前会话的信号量，用于限制并发"""
-
-    class Config:
-        arbitrary_types_allowed = True

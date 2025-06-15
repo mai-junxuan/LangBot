@@ -4,7 +4,7 @@ import abc
 import typing
 
 from ...core import app, entities as core_entities
-from . import entities as tools_entities
+import langbot_plugin.api.entities.builtin.resource.tool as resource_tool
 
 
 preregistered_loaders: list[typing.Type[ToolLoader]] = []
@@ -35,7 +35,7 @@ class ToolLoader(abc.ABC):
         pass
 
     @abc.abstractmethod
-    async def get_tools(self, enabled: bool = True) -> list[tools_entities.LLMFunction]:
+    async def get_tools(self, enabled: bool = True) -> list[resource_tool.LLMTool]:
         """获取所有工具"""
         pass
 
