@@ -3,11 +3,11 @@ from __future__ import annotations
 import asyncio
 import typing
 
-from ..platform import adapter as msadapter
-from ..platform.types import message as platform_message
-from ..platform.types import events as platform_events
+import langbot_plugin.api.entities.builtin.platform.message as platform_message
+import langbot_plugin.api.entities.builtin.platform.events as platform_events
 import langbot_plugin.api.entities.builtin.provider.session as provider_session
 import langbot_plugin.api.entities.builtin.pipeline.query as pipeline_query
+import langbot_plugin.api.definition.abstract.platform.adapter as abstract_platform_adapter
 
 
 class QueryPool:
@@ -35,7 +35,7 @@ class QueryPool:
         sender_id: typing.Union[int, str],
         message_event: platform_events.MessageEvent,
         message_chain: platform_message.MessageChain,
-        adapter: msadapter.MessagePlatformAdapter,
+        adapter: abstract_platform_adapter.AbstractMessagePlatformAdapter,
         pipeline_uuid: typing.Optional[str] = None,
     ) -> pipeline_query.Query:
         async with self.condition:

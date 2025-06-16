@@ -17,19 +17,19 @@ import threading
 
 import quart
 
-from .. import adapter
 from ...core import app
-from ..types import message as platform_message
-from ..types import events as platform_events
-from ..types import entities as platform_entities
 from ..logger import EventLogger
 import xml.etree.ElementTree as ET
 from typing import Optional, Tuple
 from functools import partial
 import logging
+import langbot_plugin.api.entities.builtin.platform.message as platform_message
+import langbot_plugin.api.entities.builtin.platform.events as platform_events
+import langbot_plugin.api.entities.builtin.platform.entities as platform_entities
+import langbot_plugin.api.definition.abstract.platform.adapter as abstract_platform_adapter
 
 
-class WeChatPadMessageConverter(adapter.MessageConverter):
+class WeChatPadMessageConverter(abstract_platform_adapter.AbstractMessageConverter):
     def __init__(self, config: dict):
         self.config = config
         self.bot = WeChatPadClient(self.config['wechatpad_url'], self.config['token'])
@@ -281,7 +281,7 @@ class WeChatPadMessageConverter(adapter.MessageConverter):
         """处理文件消息 (data_type=6)"""
         file_data = xml_data.find('.//appmsg')
 
-        if file_data.findtext('.//type', "") == "74":
+        if file_data.findtext('.//type', '') == '74':
             return None
 
         else:
@@ -304,22 +304,21 @@ class WeChatPadMessageConverter(adapter.MessageConverter):
 
             file_data = self.bot.cdn_download(aeskey=aeskey, file_type=5, file_url=cdnthumburl)
 
-            file_base64 = file_data["Data"]['FileData']
+            file_base64 = file_data['Data']['FileData']
             # print(file_data)
-            file_size = file_data["Data"]['TotalSize']
+            file_size = file_data['Data']['TotalSize']
 
             # print(file_base64)
-            return platform_message.MessageChain([
-                platform_message.WeChatFile(file_id=file_id, file_name=file_name, file_size=file_size,
-                                            file_base64=file_base64),
-                platform_message.WeChatForwardFile(xml_data=xml_data_str)
-            ])
+            return platform_message.MessageChain(
+                [
+                    platform_message.WeChatFile(
+                        file_id=file_id, file_name=file_name, file_size=file_size, file_base64=file_base64
+                    ),
+                    platform_message.WeChatForwardFile(xml_data=xml_data_str),
+                ]
+            )
 
-    async def _handler_compound_link(
-            self,
-            message: dict,
-            xml_data: ET.Element
-    ) -> platform_message.MessageChain:
+    async def _handler_compound_link(self, message: dict, xml_data: ET.Element) -> platform_message.MessageChain:
         """处理链接消息（如公众号文章、外部网页）"""
         message_list = []
         try:
@@ -420,7 +419,7 @@ class WeChatPadMessageConverter(adapter.MessageConverter):
         return from_user_name.endswith('@chatroom')
 
 
-class WeChatPadEventConverter(adapter.EventConverter):
+class WeChatPadEventConverter(abstract_platform_adapter.AbstractEventConverter):
     def __init__(self, config: dict):
         self.config = config
         self.message_converter = WeChatPadMessageConverter(config)
@@ -480,7 +479,7 @@ class WeChatPadEventConverter(adapter.EventConverter):
             )
 
 
-class WeChatPadAdapter(adapter.MessagePlatformAdapter):
+class WeChatPadAdapter(abstract_platform_adapter.AbstractMessagePlatformAdapter):
     name: str = 'WeChatPad'  # 定义适配器名称
 
     bot: WeChatPadClient
@@ -499,7 +498,7 @@ class WeChatPadAdapter(adapter.MessagePlatformAdapter):
 
     listeners: typing.Dict[
         typing.Type[platform_events.Event],
-        typing.Callable[[platform_events.Event, adapter.MessagePlatformAdapter], None],
+        typing.Callable[[platform_events.Event, abstract_platform_adapter.AbstractMessagePlatformAdapter], None],
     ] = {}
 
     def __init__(self, config: dict, ap: app.Application, logger: EventLogger):
@@ -600,14 +599,18 @@ class WeChatPadAdapter(adapter.MessagePlatformAdapter):
     def register_listener(
         self,
         event_type: typing.Type[platform_events.Event],
-        callback: typing.Callable[[platform_events.Event, adapter.MessagePlatformAdapter], None],
+        callback: typing.Callable[
+            [platform_events.Event, abstract_platform_adapter.AbstractMessagePlatformAdapter], None
+        ],
     ):
         self.listeners[event_type] = callback
 
     def unregister_listener(
         self,
         event_type: typing.Type[platform_events.Event],
-        callback: typing.Callable[[platform_events.Event, adapter.MessagePlatformAdapter], None],
+        callback: typing.Callable[
+            [platform_events.Event, abstract_platform_adapter.AbstractMessagePlatformAdapter], None
+        ],
     ):
         pass
 

@@ -5,7 +5,7 @@ import datetime
 from .. import stage, entities
 from langbot_plugin.api.entities.builtin.provider import message as provider_message
 from ...plugin import events
-from ...platform.types import message as platform_message
+import langbot_plugin.api.entities.builtin.platform.message as platform_message
 import langbot_plugin.api.entities.builtin.pipeline.query as pipeline_query
 
 

@@ -4,8 +4,8 @@ import random
 import asyncio
 
 
-from ...platform.types import events as platform_events
-from ...platform.types import message as platform_message
+import langbot_plugin.api.entities.builtin.platform.events as platform_events
+import langbot_plugin.api.entities.builtin.platform.message as platform_message
 
 from .. import stage, entities
 import langbot_plugin.api.entities.builtin.pipeline.query as pipeline_query

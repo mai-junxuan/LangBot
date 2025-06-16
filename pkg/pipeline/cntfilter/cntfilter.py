@@ -5,7 +5,7 @@ from ...core import app
 from .. import stage, entities
 from . import filter as filter_model, entities as filter_entities
 from langbot_plugin.api.entities.builtin.provider import message as provider_message
-from ...platform.types import message as platform_message
+import langbot_plugin.api.entities.builtin.platform.message as platform_message
 from ...utils import importutil
 import langbot_plugin.api.entities.builtin.pipeline.query as pipeline_query
 from . import filters

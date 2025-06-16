@@ -8,10 +8,10 @@ import re
 from PIL import Image, ImageDraw, ImageFont
 
 import functools
-from ....platform.types import message as platform_message
 
 from .. import strategy as strategy_model
 import langbot_plugin.api.entities.builtin.pipeline.query as pipeline_query
+import langbot_plugin.api.entities.builtin.platform.message as platform_message
 
 
 @strategy_model.strategy_class('image')

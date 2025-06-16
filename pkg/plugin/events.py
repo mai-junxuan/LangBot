@@ -4,10 +4,10 @@ import typing
 
 import pydantic.v1 as pydantic
 
-from ..provider import entities as llm_entities
-from ..platform.types import message as platform_message
-import langbot_plugin.api.entities.builtin.provider.session as provider_session
 import langbot_plugin.api.entities.builtin.pipeline.query as pipeline_query
+import langbot_plugin.api.entities.builtin.platform.message as platform_message
+import langbot_plugin.api.entities.builtin.provider.session as provider_session
+from ..provider import entities as llm_entities
 
 
 class BaseEventModel(pydantic.BaseModel):

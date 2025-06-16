@@ -4,9 +4,9 @@ import enum
 import typing
 
 import pydantic
-from ..platform.types import message as platform_message
 
 import langbot_plugin.api.entities.builtin.pipeline.query as pipeline_query
+import langbot_plugin.api.entities.builtin.platform.message as platform_message
 
 
 class ResultType(enum.Enum):

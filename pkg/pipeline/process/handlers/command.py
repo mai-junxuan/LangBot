@@ -4,9 +4,9 @@ import typing
 
 from .. import handler
 from ... import entities
-from langbot_plugin.api.entities.builtin.provider import message as provider_message
 from ....plugin import events
-from ....platform.types import message as platform_message
+import langbot_plugin.api.entities.builtin.provider.message as provider_message
+import langbot_plugin.api.entities.builtin.platform.message as platform_message
 import langbot_plugin.api.entities.builtin.provider.session as provider_session
 import langbot_plugin.api.entities.builtin.pipeline.query as pipeline_query
 

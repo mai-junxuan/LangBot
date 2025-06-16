@@ -9,7 +9,8 @@ from ..core import app
 from . import entities as pipeline_entities
 from ..entity.persistence import pipeline as persistence_pipeline
 from . import stage
-from ..platform.types import message as platform_message, events as platform_events
+import langbot_plugin.api.entities.builtin.platform.message as platform_message
+import langbot_plugin.api.entities.builtin.platform.events as platform_events
 from ..plugin import events
 from ..utils import importutil
 

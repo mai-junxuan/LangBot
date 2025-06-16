@@ -5,16 +5,17 @@ import traceback
 import datetime
 
 import aiocqhttp
+import pydantic
 
-from .. import adapter
-from ..types import message as platform_message
-from ..types import events as platform_events
-from ..types import entities as platform_entities
+import langbot_plugin.api.definition.abstract.platform.adapter as abstract_platform_adapter
+import langbot_plugin.api.entities.builtin.platform.message as platform_message
+import langbot_plugin.api.entities.builtin.platform.events as platform_events
+import langbot_plugin.api.entities.builtin.platform.entities as platform_entities
 from ...utils import image
-from ..logger import EventLogger
+import langbot_plugin.api.definition.abstract.platform.event_logger as abstract_platform_logger
 
 
-class AiocqhttpMessageConverter(adapter.MessageConverter):
+class AiocqhttpMessageConverter(abstract_platform_adapter.AbstractMessageConverter):
     @staticmethod
     async def yiri2target(
         message_chain: platform_message.MessageChain,
@@ -60,8 +61,7 @@ class AiocqhttpMessageConverter(adapter.MessageConverter):
                 for node in msg.node_list:
                     msg_list.extend((await AiocqhttpMessageConverter.yiri2target(node.message_chain))[0])
             elif isinstance(msg, platform_message.File):
-                msg_list.append({"type":"file", "data":{'file': msg.url, "name": msg.name}})
-
+                msg_list.append({'type': 'file', 'data': {'file': msg.url, 'name': msg.name}})
 
             else:
                 msg_list.append(aiocqhttp.MessageSegment.text(str(msg)))
@@ -140,16 +140,17 @@ class AiocqhttpMessageConverter(adapter.MessageConverter):
                 file_data = await bot.get_file(file_id=file_id)
                 file_name = file_data.get('file_name')
                 file_path = file_data.get('file')
+                _ = file_path
                 file_url = file_data.get('file_url')
                 file_size = file_data.get('file_size')
-                yiri_msg_list.append(platform_message.File(id=file_id, name=file_name,url=file_url,size=file_size))
-        
+                yiri_msg_list.append(platform_message.File(id=file_id, name=file_name, url=file_url, size=file_size))
+
         chain = platform_message.MessageChain(yiri_msg_list)
 
         return chain
 
 
-class AiocqhttpEventConverter(adapter.EventConverter):
+class AiocqhttpEventConverter(abstract_platform_adapter.AbstractEventConverter):
     @staticmethod
     async def yiri2target(event: platform_events.MessageEvent, bot_account_id: int):
         return event.source_platform_object
@@ -199,21 +200,19 @@ class AiocqhttpEventConverter(adapter.EventConverter):
             )
 
 
-class AiocqhttpAdapter(adapter.MessagePlatformAdapter):
-    bot: aiocqhttp.CQHttp
-
-    bot_account_id: int
+class AiocqhttpAdapter(abstract_platform_adapter.AbstractMessagePlatformAdapter):
+    bot: aiocqhttp.CQHttp = pydantic.Field(exclude=True, default_factory=aiocqhttp.CQHttp)
 
     message_converter: AiocqhttpMessageConverter = AiocqhttpMessageConverter()
     event_converter: AiocqhttpEventConverter = AiocqhttpEventConverter()
 
-    config: dict
-
     on_websocket_connection_event_cache: typing.List[typing.Callable[[aiocqhttp.Event], None]] = []
 
-    def __init__(self, config: dict, logger: EventLogger):
-        self.config = config
-        self.logger = logger
+    def __init__(self, config: dict, logger: abstract_platform_logger.AbstractEventLogger):
+        super().__init__(
+            config=config,
+            logger=logger,
+        )
 
         async def shutdown_trigger_placeholder():
             while True:
@@ -233,7 +232,6 @@ class AiocqhttpAdapter(adapter.MessagePlatformAdapter):
         aiocq_msg = (await AiocqhttpMessageConverter.yiri2target(message))[0]
 
         if target_type == 'group':
-
             await self.bot.send_group_msg(group_id=int(target_id), message=aiocq_msg)
         elif target_type == 'person':
             await self.bot.send_private_msg(user_id=int(target_id), message=aiocq_msg)
@@ -257,7 +255,9 @@ class AiocqhttpAdapter(adapter.MessagePlatformAdapter):
     def register_listener(
         self,
         event_type: typing.Type[platform_events.Event],
-        callback: typing.Callable[[platform_events.Event, adapter.MessagePlatformAdapter], None],
+        callback: typing.Callable[
+            [platform_events.Event, abstract_platform_adapter.AbstractMessagePlatformAdapter], None
+        ],
     ):
         async def on_message(event: aiocqhttp.Event):
             self.bot_account_id = event.self_id
@@ -285,7 +285,9 @@ class AiocqhttpAdapter(adapter.MessagePlatformAdapter):
     def unregister_listener(
         self,
         event_type: typing.Type[platform_events.Event],
-        callback: typing.Callable[[platform_events.Event, adapter.MessagePlatformAdapter], None],
+        callback: typing.Callable[
+            [platform_events.Event, abstract_platform_adapter.AbstractMessagePlatformAdapter], None
+        ],
     ):
         return super().unregister_listener(event_type, callback)
 

@@ -9,7 +9,7 @@ from ... import entities
 from ....provider import runner as runner_module
 from ....plugin import events
 
-from ....platform.types import message as platform_message
+import langbot_plugin.api.entities.builtin.platform.message as platform_message
 from ....utils import importutil
 from ....provider import runners
 import langbot_plugin.api.entities.builtin.provider.session as provider_session

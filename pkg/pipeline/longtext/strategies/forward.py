@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from .. import strategy as strategy_model
 
-from ....platform.types import message as platform_message
 import langbot_plugin.api.entities.builtin.pipeline.query as pipeline_query
+import langbot_plugin.api.entities.builtin.platform.message as platform_message
 
 ForwardMessageDiaplay = platform_message.ForwardMessageDiaplay
 Forward = platform_message.Forward

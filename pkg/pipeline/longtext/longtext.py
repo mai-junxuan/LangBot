@@ -5,7 +5,7 @@ import traceback
 
 from . import strategy
 from .. import stage, entities
-from ...platform.types import message as platform_message
+import langbot_plugin.api.entities.builtin.platform.message as platform_message
 from ...utils import importutil
 import langbot_plugin.api.entities.builtin.pipeline.query as pipeline_query
 from . import strategies

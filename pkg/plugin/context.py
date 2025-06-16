@@ -5,8 +5,8 @@ import abc
 
 from . import events
 from ..core import app
-from ..platform.types import message as platform_message
-from ..platform import adapter as platform_adapter
+import langbot_plugin.api.entities.builtin.platform.message as platform_message
+import langbot_plugin.api.definition.abstract.platform.adapter as abstract_platform_adapter
 
 
 def register(
@@ -115,7 +115,7 @@ class APIHost:
 
     # ========== 插件可调用的 API（主程序API） ==========
 
-    def get_platform_adapters(self) -> list[platform_adapter.MessagePlatformAdapter]:
+    def get_platform_adapters(self) -> list[abstract_platform_adapter.AbstractMessagePlatformAdapter]:
         """获取已启用的消息平台适配器列表
 
         Returns:
@@ -125,7 +125,7 @@ class APIHost:
 
     async def send_active_message(
         self,
-        adapter: platform_adapter.MessagePlatformAdapter,
+        adapter: abstract_platform_adapter.AbstractMessagePlatformAdapter,
         target_type: str,
         target_id: str,
         message: platform_message.MessageChain,
