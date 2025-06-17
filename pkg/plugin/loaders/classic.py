@@ -5,11 +5,12 @@ import pkgutil
 import importlib
 import traceback
 
-from .. import loader, events, context, models
+from .. import loader, context, models
 from langbot_plugin.api.entities.builtin.resource import tool as resource_tool
 from ...utils import funcschema
 from ...discover import engine as discover_engine
 import langbot_plugin.api.entities.builtin.pipeline.query as pipeline_query
+import langbot_plugin.api.entities.events as events
 
 
 class PluginLoader(loader.PluginLoader):

@@ -5,10 +5,11 @@ import os
 import traceback
 
 from ...core import app
-from .. import context, events
+from .. import context
 from .. import loader
 from ...utils import funcschema
 import langbot_plugin.api.entities.builtin.resource.tool as resource_tool
+import langbot_plugin.api.entities.events as events
 
 
 class PluginManifestLoader(loader.PluginLoader):

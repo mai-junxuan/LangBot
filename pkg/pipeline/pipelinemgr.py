@@ -11,11 +11,12 @@ from ..entity.persistence import pipeline as persistence_pipeline
 from . import stage
 import langbot_plugin.api.entities.builtin.platform.message as platform_message
 import langbot_plugin.api.entities.builtin.platform.events as platform_events
-from ..plugin import events
+import langbot_plugin.api.entities.events as events
 from ..utils import importutil
 
 import langbot_plugin.api.entities.builtin.provider.session as provider_session
 import langbot_plugin.api.entities.builtin.pipeline.query as pipeline_query
+import langbot_plugin.api.entities.context as event_context
 
 from . import (
     resprule,
@@ -183,15 +184,26 @@ class RuntimePipeline:
                 else events.GroupMessageReceived
             )
 
-            event_ctx = await self.ap.plugin_mgr.emit_event(
-                event=event_type(
-                    launcher_type=query.launcher_type.value,
-                    launcher_id=query.launcher_id,
-                    sender_id=query.sender_id,
-                    message_chain=query.message_chain,
-                    query=query,
-                )
+            print(query)
+            print(query.model_dump(exclude_none=True))
+
+            event_obj = event_type(
+                launcher_type=query.launcher_type.value,
+                launcher_id=query.launcher_id,
+                sender_id=query.sender_id,
+                message_chain=query.message_chain,
+                query=query,
             )
+
+            event_ctx = event_context.EventContext(
+                event=event_obj,
+            )
+
+            event_ctx_result = await self.ap.plugin_connector.handler.emit_event(
+                event_ctx.model_dump(exclude_none=True)
+            )
+
+            event_ctx.update(**event_ctx_result)
 
             if event_ctx.is_prevented_default():
                 return
