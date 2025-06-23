@@ -23,7 +23,7 @@
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/RockChinQ/LangBot)](https://github.com/RockChinQ/LangBot/releases/latest)
 <img src="https://img.shields.io/badge/python-3.10 ~ 3.13 -blue.svg" alt="python">
 
-[简体中文](README.md) / [English](README_EN.md) / [日本語](README_JP.md) / (PR for your language)
+[简体中文](README_CN.md) / [English](README.md) / [日本語](README_JP.md) / (PR for your language)
 
 </div>
 
@@ -134,3 +134,9 @@ LangBot への貢献に対して、以下の [コード貢献者](https://github
 <a href="https://github.com/RockChinQ/LangBot/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=RockChinQ/LangBot" />
 </a>
+
+## 😎 最新情報を入手
+
+リポジトリの右上にある Star と Watch ボタンをクリックして、最新の更新を取得してください。
+
+![star gif](https://docs.langbot.app/star.gif)

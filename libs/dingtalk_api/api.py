@@ -2,7 +2,7 @@ import base64
 import json
 import time
 from typing import Callable
-import dingtalk_stream
+import dingtalk_stream  # type: ignore
 from .EchoHandler import EchoTextHandler
 from .dingtalkevent import DingTalkEvent
 import httpx
@@ -17,6 +17,7 @@ class DingTalkClient:
         robot_name: str,
         robot_code: str,
         markdown_card: bool,
+        logger: None,
     ):
         """初始化 WebSocket 连接并自动启动"""
         self.credential = dingtalk_stream.Credential(client_id, client_secret)
@@ -34,6 +35,7 @@ class DingTalkClient:
         self.robot_code = robot_code
         self.access_token_expiry_time = ''
         self.markdown_card = markdown_card
+        self.logger = logger
 
     async def get_access_token(self):
         url = 'https://api.dingtalk.com/v1.0/oauth2/accessToken'
@@ -47,8 +49,8 @@ class DingTalkClient:
                     self.access_token = response_data.get('accessToken')
                     expires_in = int(response_data.get('expireIn', 7200))
                     self.access_token_expiry_time = time.time() + expires_in - 60
-            except Exception as e:
-                raise Exception(e)
+            except Exception:
+                await self.logger.error('failed to get access token in dingtalk')
 
     async def is_token_expired(self):
         """检查token是否过期"""
@@ -73,7 +75,7 @@ class DingTalkClient:
                 result = response.json()
                 download_url = result.get('downloadUrl')
             else:
-                raise Exception(f'Error: {response.status_code}, {response.text}')
+                await self.logger.error(f'failed to get download url: {response.json()}')
 
         if download_url:
             return await self.download_url_to_base64(download_url)
@@ -84,10 +86,11 @@ class DingTalkClient:
 
             if response.status_code == 200:
                 file_bytes = response.content
-                base64_str = base64.b64encode(file_bytes).decode('utf-8')  # 返回字符串格式
-                return base64_str
+                mime_type = response.headers.get('Content-Type', 'application/octet-stream')
+                base64_str = base64.b64encode(file_bytes).decode('utf-8')
+                return f'data:{mime_type};base64,{base64_str}'
             else:
-                raise Exception('获取文件失败')
+                await self.logger.error(f'failed to get files: {response.json()}')
 
     async def get_audio_url(self, download_code: str):
         if not await self.check_access_token():
@@ -103,7 +106,7 @@ class DingTalkClient:
                 if download_url:
                     return await self.download_url_to_base64(download_url)
                 else:
-                    raise Exception('获取音频失败')
+                    await self.logger.error(f'failed to get audio: {response.json()}')
             else:
                 raise Exception(f'Error: {response.status_code}, {response.text}')
 
@@ -115,12 +118,12 @@ class DingTalkClient:
             if event:
                 await self._handle_message(event)
 
-    async def send_message(self, content: str, incoming_message,at:bool):
+    async def send_message(self, content: str, incoming_message, at: bool):
         if self.markdown_card:
             if at:
                 self.EchoTextHandler.reply_markdown(
-                    title='@'+incoming_message.sender_nick+' '+content,
-                    text='@'+incoming_message.sender_nick+' '+content,
+                    title='@' + incoming_message.sender_nick + ' ' + content,
+                    text='@' + incoming_message.sender_nick + ' ' + content,
                     incoming_message=incoming_message,
                 )
             else:
@@ -191,7 +194,10 @@ class DingTalkClient:
             del copy_message_data['IncomingMessage']
             # print("message_data:", json.dumps(copy_message_data, indent=4, ensure_ascii=False))
         except Exception:
-            traceback.print_exc()
+            if self.logger:
+                await self.logger.error(f'Error in get_message: {traceback.format_exc()}')
+            else:
+                traceback.print_exc()
 
         return message_data
 
@@ -214,9 +220,12 @@ class DingTalkClient:
         }
         try:
             async with httpx.AsyncClient() as client:
-                await client.post(url, headers=headers, json=data)
+                response = await client.post(url, headers=headers, json=data)
+                if response.status_code == 200:
+                    return
         except Exception:
-            traceback.print_exc()
+            await self.logger.error(f'failed to send proactive massage to person: {traceback.format_exc()}')
+            raise Exception(f'failed to send proactive massage to person: {traceback.format_exc()}')
 
     async def send_proactive_message_to_group(self, target_id: str, content: str):
         if not await self.check_access_token():
@@ -237,9 +246,12 @@ class DingTalkClient:
         }
         try:
             async with httpx.AsyncClient() as client:
-                await client.post(url, headers=headers, json=data)
+                response = await client.post(url, headers=headers, json=data)
+                if response.status_code == 200:
+                    return
         except Exception:
-            traceback.print_exc()
+            await self.logger.error(f'failed to send proactive massage to group: {traceback.format_exc()}')
+            raise Exception(f'failed to send proactive massage to group: {traceback.format_exc()}')
 
     async def start(self):
         """启动 WebSocket 连接，监听消息"""

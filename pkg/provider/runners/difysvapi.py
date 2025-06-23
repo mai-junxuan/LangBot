@@ -93,6 +93,7 @@ class DifyServiceAPIRunner(runner.RequestRunner):
     async def _chat_messages(self, query: core_entities.Query) -> typing.AsyncGenerator[llm_entities.Message, None]:
         """调用聊天助手"""
         cov_id = query.session.using_conversation.uuid or ''
+        query.variables['conversation_id'] = cov_id
 
         plain_text, image_ids = await self._preprocess_user_message(query)
 
@@ -188,6 +189,7 @@ class DifyServiceAPIRunner(runner.RequestRunner):
     ) -> typing.AsyncGenerator[llm_entities.Message, None]:
         """调用聊天助手"""
         cov_id = query.session.using_conversation.uuid or ''
+        query.variables['conversation_id'] = cov_id
 
         plain_text, image_ids = await self._preprocess_user_message(query)
 

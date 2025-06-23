@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import uuid
 import sqlalchemy
+import typing
 
 from ....core import app
 from ....entity.persistence import bot as persistence_bot
@@ -92,9 +93,25 @@ class BotService:
         if runtime_bot.enable:
             await runtime_bot.run()
 
+        # update all conversation that use this bot
+        for session in self.ap.sess_mgr.session_list:
+            if session.using_conversation is not None and session.using_conversation.bot_uuid == bot_uuid:
+                session.using_conversation = None
+
     async def delete_bot(self, bot_uuid: str) -> None:
         """删除机器人"""
         await self.ap.platform_mgr.remove_bot(bot_uuid)
         await self.ap.persistence_mgr.execute_async(
             sqlalchemy.delete(persistence_bot.Bot).where(persistence_bot.Bot.uuid == bot_uuid)
         )
+
+    async def list_event_logs(
+        self, bot_uuid: str, from_index: int, max_count: int
+    ) -> typing.Tuple[list[dict], int, int, int]:
+        runtime_bot = await self.ap.platform_mgr.get_bot_by_uuid(bot_uuid)
+        if runtime_bot is None:
+            raise Exception('Bot not found')
+
+        logs, total_count = await runtime_bot.logger.get_logs(from_index, max_count)
+
+        return [log.to_json() for log in logs], total_count

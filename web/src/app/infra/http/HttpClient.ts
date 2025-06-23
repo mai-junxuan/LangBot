@@ -29,7 +29,11 @@ import {
   GetPipelineResponseData,
   GetPipelineMetadataResponseData,
   AsyncTask,
+  ApiRespWebChatMessage,
+  ApiRespWebChatMessages,
 } from '@/app/infra/entities/api';
+import { GetBotLogsRequest } from '@/app/infra/http/requestParam/bots/GetBotLogsRequest';
+import { GetBotLogsResponse } from '@/app/infra/http/requestParam/bots/GetBotLogsResponse';
 
 type JSONValue = string | number | boolean | JSONObject | JSONArray | null;
 interface JSONObject {
@@ -54,12 +58,14 @@ export let systemInfo: ApiRespSystemInfo | null = null;
 class HttpClient {
   private instance: AxiosInstance;
   private disableToken: boolean = false;
+  private baseURL: string;
   // 暂不需要SSR
   // private ssrInstance: AxiosInstance | null = null
 
-  constructor(baseURL?: string, disableToken?: boolean) {
+  constructor(baseURL: string, disableToken?: boolean) {
+    this.baseURL = baseURL;
     this.instance = axios.create({
-      baseURL: baseURL || this.getBaseUrl(),
+      baseURL: baseURL,
       timeout: 15000,
       headers: {
         'Content-Type': 'application/json',
@@ -75,15 +81,9 @@ class HttpClient {
     }
   }
 
-  // 兜底URL，如果使用未配置会走到这里
-  private getBaseUrl(): string {
-    // NOT IMPLEMENT
-    if (typeof window === 'undefined') {
-      // 服务端环境
-      return '';
-    }
-    // 客户端环境
-    return '';
+  // 外部获取baseURL的方法
+  getBaseUrl(): string {
+    return this.baseURL;
   }
 
   // 获取Session
@@ -271,6 +271,10 @@ class HttpClient {
     return this.put(`/api/v1/provider/models/llm/${uuid}`, model);
   }
 
+  public testLLMModel(uuid: string, model: LLMModel): Promise<object> {
+    return this.post(`/api/v1/provider/models/llm/${uuid}/test`, model);
+  }
+
   // ============ Pipeline API ============
   public getGeneralPipelineMetadata(): Promise<GetPipelineMetadataResponseData> {
     // as designed, this method will be deprecated, and only for developer to check the prefered config schema
@@ -297,6 +301,43 @@ class HttpClient {
 
   public deletePipeline(uuid: string): Promise<object> {
     return this.delete(`/api/v1/pipelines/${uuid}`);
+  }
+
+  // ============ Debug WebChat API ============
+  public sendWebChatMessage(
+    sessionType: string,
+    messageChain: object[],
+    pipelineId: string,
+    timeout: number = 15000,
+  ): Promise<ApiRespWebChatMessage> {
+    return this.post(
+      `/api/v1/pipelines/${pipelineId}/chat/send`,
+      {
+        session_type: sessionType,
+        message: messageChain,
+      },
+      {
+        timeout,
+      },
+    );
+  }
+
+  public getWebChatHistoryMessages(
+    pipelineId: string,
+    sessionType: string,
+  ): Promise<ApiRespWebChatMessages> {
+    return this.get(
+      `/api/v1/pipelines/${pipelineId}/chat/messages/${sessionType}`,
+    );
+  }
+
+  public resetWebChatSession(
+    pipelineId: string,
+    sessionType: string,
+  ): Promise<{ message: string }> {
+    return this.post(
+      `/api/v1/pipelines/${pipelineId}/chat/reset/${sessionType}`,
+    );
   }
 
   // ============ Platform API ============
@@ -339,6 +380,13 @@ class HttpClient {
 
   public deleteBot(uuid: string): Promise<object> {
     return this.delete(`/api/v1/platform/bots/${uuid}`);
+  }
+
+  public getBotLogs(
+    botId: string,
+    request: GetBotLogsRequest,
+  ): Promise<GetBotLogsResponse> {
+    return this.post(`/api/v1/platform/bots/${botId}/logs`, request);
   }
 
   // ============ Plugins API ============
@@ -446,9 +494,15 @@ class HttpClient {
   }
 }
 
-// export const httpClient = new HttpClient("https://version-4.langbot.dev");
-// export const httpClient = new HttpClient('http://localhost:5300');
-export const httpClient = new HttpClient('/');
+const getBaseURL = (): string => {
+  if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_API_BASE_URL) {
+    return process.env.NEXT_PUBLIC_API_BASE_URL;
+  }
+
+  return '/';
+};
+
+export const httpClient = new HttpClient(getBaseURL());
 
 // 临时写法，未来两种Client都继承自HttpClient父类，不允许共享方法
 export const spaceClient = new HttpClient('https://space.langbot.app');

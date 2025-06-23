@@ -5,16 +5,17 @@ import asyncio
 import traceback
 import sqlalchemy
 
-
 #     FriendMessage, Image, MessageChain, Plain
 from . import adapter as msadapter
 
 from ..core import app, entities as core_entities, taskmgr
-from .types import events as platform_events
+from .types import events as platform_events, message as platform_message
 
 from ..discover import engine
 
 from ..entity.persistence import bot as persistence_bot
+
+from .logger import EventLogger
 
 # 处理 3.4 移除了 YiriMirai 之后，插件的兼容性问题
 from . import types as mirai
@@ -37,23 +38,37 @@ class RuntimeBot:
 
     task_context: taskmgr.TaskContext
 
+    logger: EventLogger
+
     def __init__(
         self,
         ap: app.Application,
         bot_entity: persistence_bot.Bot,
         adapter: msadapter.MessagePlatformAdapter,
+        logger: EventLogger,
     ):
         self.ap = ap
         self.bot_entity = bot_entity
         self.enable = bot_entity.enable
         self.adapter = adapter
         self.task_context = taskmgr.TaskContext()
+        self.logger = logger
 
     async def initialize(self):
         async def on_friend_message(
             event: platform_events.FriendMessage,
             adapter: msadapter.MessagePlatformAdapter,
         ):
+            image_components = [
+                component for component in event.message_chain if isinstance(component, platform_message.Image)
+            ]
+
+            await self.logger.info(
+                f'{event.message_chain}',
+                images=image_components,
+                message_session_id=f'person_{event.sender.id}',
+            )
+
             await self.ap.query_pool.add_query(
                 bot_uuid=self.bot_entity.uuid,
                 launcher_type=core_entities.LauncherTypes.PERSON,
@@ -62,12 +77,23 @@ class RuntimeBot:
                 message_event=event,
                 message_chain=event.message_chain,
                 adapter=adapter,
+                pipeline_uuid=self.bot_entity.use_pipeline_uuid,
             )
 
         async def on_group_message(
             event: platform_events.GroupMessage,
             adapter: msadapter.MessagePlatformAdapter,
         ):
+            image_components = [
+                component for component in event.message_chain if isinstance(component, platform_message.Image)
+            ]
+
+            await self.logger.info(
+                f'{event.message_chain}',
+                images=image_components,
+                message_session_id=f'group_{event.group.id}',
+            )
+
             await self.ap.query_pool.add_query(
                 bot_uuid=self.bot_entity.uuid,
                 launcher_type=core_entities.LauncherTypes.GROUP,
@@ -76,6 +102,7 @@ class RuntimeBot:
                 message_event=event,
                 message_chain=event.message_chain,
                 adapter=adapter,
+                pipeline_uuid=self.bot_entity.use_pipeline_uuid,
             )
 
         self.adapter.register_listener(platform_events.FriendMessage, on_friend_message)
@@ -91,13 +118,8 @@ class RuntimeBot:
                 if isinstance(e, asyncio.CancelledError):
                     self.task_context.set_current_action('Exited.')
                     return
-
-                traceback_str = traceback.format_exc()
                 self.task_context.set_current_action('Exited with error.')
-                self.task_context.log(f'平台适配器运行出错: {e}')
-                self.task_context.log(f'Traceback: {traceback_str}')
-                self.ap.logger.error(f'平台适配器运行出错: {e}')
-                self.ap.logger.debug(f'Traceback: {traceback_str}')
+                await self.logger.error(f'平台适配器运行出错:\n{e}\n{traceback.format_exc()}')
 
         self.task_wrapper = self.ap.task_mgr.create_task(
             exception_wrapper(),
@@ -123,6 +145,8 @@ class PlatformManager:
 
     bots: list[RuntimeBot]
 
+    webchat_proxy_bot: RuntimeBot
+
     adapter_components: list[engine.Component]
 
     adapter_dict: dict[str, type[msadapter.MessagePlatformAdapter]]
@@ -139,6 +163,31 @@ class PlatformManager:
         for component in self.adapter_components:
             adapter_dict[component.metadata.name] = component.get_python_component_class()
         self.adapter_dict = adapter_dict
+
+        webchat_adapter_class = self.adapter_dict['webchat']
+
+        # initialize webchat adapter
+        webchat_logger = EventLogger(name='webchat-adapter', ap=self.ap)
+        webchat_adapter_inst = webchat_adapter_class(
+            {},
+            self.ap,
+            webchat_logger,
+        )
+
+        self.webchat_proxy_bot = RuntimeBot(
+            ap=self.ap,
+            bot_entity=persistence_bot.Bot(
+                uuid='webchat-proxy-bot',
+                name='WebChat',
+                description='',
+                adapter='webchat',
+                adapter_config={},
+                enable=True,
+            ),
+            adapter=webchat_adapter_inst,
+            logger=webchat_logger,
+        )
+        await self.webchat_proxy_bot.initialize()
 
         await self.load_bots_from_db()
 
@@ -168,9 +217,15 @@ class PlatformManager:
         elif isinstance(bot_entity, dict):
             bot_entity = persistence_bot.Bot(**bot_entity)
 
-        adapter_inst = self.adapter_dict[bot_entity.adapter](bot_entity.adapter_config, self.ap)
+        logger = EventLogger(name=f'platform-adapter-{bot_entity.name}', ap=self.ap)
 
-        runtime_bot = RuntimeBot(ap=self.ap, bot_entity=bot_entity, adapter=adapter_inst)
+        adapter_inst = self.adapter_dict[bot_entity.adapter](
+            bot_entity.adapter_config,
+            self.ap,
+            logger,
+        )
+
+        runtime_bot = RuntimeBot(ap=self.ap, bot_entity=bot_entity, adapter=adapter_inst, logger=logger)
 
         await runtime_bot.initialize()
 
@@ -193,7 +248,9 @@ class PlatformManager:
                 return
 
     def get_available_adapters_info(self) -> list[dict]:
-        return [component.to_plain_dict() for component in self.adapter_components]
+        return [
+            component.to_plain_dict() for component in self.adapter_components if component.metadata.name != 'webchat'
+        ]
 
     def get_available_adapter_info_by_name(self, name: str) -> dict | None:
         for component in self.adapter_components:
@@ -246,6 +303,8 @@ class PlatformManager:
 
     async def run(self):
         # This method will only be called when the application launching
+        await self.webchat_proxy_bot.run()
+
         for bot in self.bots:
             if bot.enable:
                 await bot.run()

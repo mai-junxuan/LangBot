@@ -3,7 +3,10 @@ import logging
 import typing
 from datetime import datetime
 from pathlib import Path
+import base64
 
+import aiofiles
+import httpx
 import pydantic.v1 as pydantic
 
 from . import entities as platform_entities
@@ -552,52 +555,29 @@ class Image(MessageComponent):
             image_id = image_id[1:]
         return image_id
 
-    async def download(
-        self,
-        filename: typing.Union[str, Path, None] = None,
-        directory: typing.Union[str, Path, None] = None,
-        determine_type: bool = True,
-    ):
-        """下载图片到本地。
+    async def get_bytes(self) -> typing.Tuple[bytes, str]:
+        """获取图片的 bytes 和 mime type"""
+        if self.url:
+            async with httpx.AsyncClient() as client:
+                response = await client.get(self.url)
+                response.raise_for_status()
+                return response.content, response.headers.get('Content-Type')
+        elif self.base64:
+            mime_type = 'image/jpeg'
 
-        Args:
-            filename: 下载到本地的文件路径。与 `directory` 二选一。
-            directory: 下载到本地的文件夹路径。与 `filename` 二选一。
-            determine_type: 是否自动根据图片类型确定拓展名，默认为 True。
-        """
-        if not self.url:
-            logger.warning(f'图片 `{self.uuid}` 无 url 参数，下载失败。')
-            return
+            split_index = self.base64.find(';base64,')
+            if split_index == -1:
+                raise ValueError('Invalid base64 string')
 
-        import httpx
+            mime_type = self.base64[5:split_index]
+            base64_data = self.base64[split_index + 8 :]
 
-        async with httpx.AsyncClient() as client:
-            response = await client.get(self.url)
-            response.raise_for_status()
-            content = response.content
-
-            if filename:
-                path = Path(filename)
-                if determine_type:
-                    import imghdr
-
-                    path = path.with_suffix('.' + str(imghdr.what(None, content)))
-                path.parent.mkdir(parents=True, exist_ok=True)
-            elif directory:
-                import imghdr
-
-                path = Path(directory)
-                path.mkdir(parents=True, exist_ok=True)
-                path = path / f'{self.uuid}.{imghdr.what(None, content)}'
-            else:
-                raise ValueError('请指定文件路径或文件夹路径！')
-
-            import aiofiles
-
-            async with aiofiles.open(path, 'wb') as f:
-                await f.write(content)
-
-            return path
+            return base64.b64decode(base64_data), mime_type
+        elif self.path:
+            async with aiofiles.open(self.path, 'rb') as f:
+                return await f.read(), 'image/jpeg'
+        else:
+            raise ValueError('Can not get bytes from image')
 
     @classmethod
     async def from_local(
@@ -820,16 +800,48 @@ class File(MessageComponent):
 
     type: str = 'File'
     """消息组件类型。"""
-    id: str
+    id: str = ''
     """文件识别 ID。"""
     name: str
     """文件名称。"""
-    size: int
+    size: int = 0
     """文件大小。"""
+    url: str
+    """文件路径"""
 
     def __str__(self):
         return f'[文件]{self.name}'
 
+class Face(MessageComponent):
+    """系统表情
+    此处将超级表情骰子/划拳，一同归类于face
+    当face_type为rps(划拳)时 face_id 对应的是手势
+    当face_type为dice(骰子)时 face_id 对应的是点数
+    """
+    type: str = 'Face'
+    """表情类型"""
+    face_type: str = 'face'
+    """表情id"""
+    face_id: int = 0
+    """表情名"""
+    face_name: str = ''
+
+    def __str__(self):
+        if self.face_type == 'face':
+            return f'[表情]{self.face_name}'
+        elif self.face_type == 'dice':
+            return f'[表情]{self.face_id}点的{self.face_name}'
+        elif self.face_type == 'rps':
+            return f'[表情]{self.face_name}({self.rps_data(self.face_id)})'
+
+
+    def rps_data(self,face_id):
+        rps_dict ={
+            1 : "布",
+            2 : "剪刀",
+            3 : "石头",
+        }
+        return rps_dict[face_id]
 
 # ================ 个人微信专用组件 ================
 
@@ -942,3 +954,22 @@ class WeChatForwardQuote(MessageComponent):
 
     def __str__(self):
         return self.app_msg
+
+
+class WeChatFile(MessageComponent):
+    """文件。"""
+
+    type: str = 'File'
+    """消息组件类型。"""
+    file_id: str = ''
+    """文件识别 ID。"""
+    file_name: str = ''
+    """文件名称。"""
+    file_size: int = 0
+    """文件大小。"""
+    file_path: str = ''
+    """文件地址"""
+    file_base64: str = ''
+    """base64"""
+    def __str__(self):
+        return f'[文件]{self.file_name}'

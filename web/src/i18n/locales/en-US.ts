@@ -37,6 +37,8 @@ const enUS = {
     deleteSuccess: 'Deleted successfully',
     deleteError: 'Delete failed: ',
     addRound: 'Add Round',
+    copySuccess: 'Copy Successfully',
+    test: 'Test',
   },
   notFound: {
     title: 'Page not found',
@@ -89,6 +91,8 @@ const enUS = {
     modelProviderDescription:
       'Please fill in the model name provided by the supplier',
     selectModel: 'Select Model',
+    testSuccess: 'Test successful',
+    testError: 'Test failed, please check your model configuration',
   },
   bots: {
     title: 'Bots',
@@ -117,6 +121,14 @@ const enUS = {
     adapterConfig: 'Adapter Configuration',
     bindPipeline: 'Bind Pipeline',
     selectPipeline: 'Select Pipeline',
+    botLogTitle: 'Bot Log',
+    enableAutoRefresh: 'Enable Auto Refresh',
+    session: 'Session',
+    yesterday: 'Yesterday',
+    earlier: 'Earlier',
+    dateFormat: '{{month}}/{{day}}',
+    setBotEnableError: 'Failed to set bot enable status',
+    log: 'Log',
   },
   plugins: {
     title: 'Plugins',
@@ -172,6 +184,7 @@ const enUS = {
       'Pipelines define the processing flow for message events, used to bind to bots',
     createPipeline: 'Create Pipeline',
     editPipeline: 'Edit Pipeline',
+    chat: 'Chat',
     getPipelineListError: 'Failed to get pipeline list: ',
     daysAgo: 'days ago',
     today: 'Today',
@@ -191,6 +204,34 @@ const enUS = {
     deleteConfirmation:
       'Are you sure you want to delete this pipeline? Bots bound to this pipeline will not work.',
     defaultPipelineCannotDelete: 'Default pipeline cannot be deleted',
+    debugDialog: {
+      title: 'Pipeline Chat',
+      selectPipeline: 'Select Pipeline',
+      sessionType: 'Session Type',
+      privateChat: 'Private Chat',
+      groupChat: 'Group Chat',
+      send: 'Send',
+      reset: 'Reset Conversation',
+      inputPlaceholder: 'Enter message...',
+      noMessages: 'No messages',
+      userMessage: 'User',
+      botMessage: 'Bot',
+      sendFailed: 'Send failed',
+      resetSuccess: 'Conversation reset successfully',
+      resetFailed: 'Reset failed',
+      loadMessagesFailed: 'Failed to load messages',
+      loadPipelinesFailed: 'Failed to load pipelines',
+      atTips: 'Mention the bot',
+    },
+  },
+  register: {
+    title: 'Initialize LangBot 👋',
+    description: 'This is your first time starting LangBot',
+    adminAccountNote:
+      'The email and password you fill in will be used as the initial administrator account',
+    register: 'Register',
+    initSuccess: 'Initialization successful, please login',
+    initFailed: 'Initialization failed: ',
   },
 };
 

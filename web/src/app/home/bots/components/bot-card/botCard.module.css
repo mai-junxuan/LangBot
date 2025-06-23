@@ -19,7 +19,6 @@
   flex-direction: row;
   gap: 0.8rem;
   user-select: none;
-  /* background-color: aqua; */
 }
 
 .iconImage {
@@ -30,9 +29,11 @@
 }
 
 .basicInfoContainer {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
+  width: 100%;
 }
 
 .basicInfoNameContainer {
@@ -43,12 +44,18 @@
 .basicInfoName {
   font-size: 1.4rem;
   font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .basicInfoDescription {
   font-size: 1rem;
   font-weight: 300;
   color: #b1b1b1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .basicInfoAdapterContainer {
@@ -87,4 +94,23 @@
   font-size: 1.2rem;
   font-weight: 500;
   color: #626262;
+}
+
+.bigText {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 1.4rem;
+  font-weight: bold;
+  max-width: 100%;
+}
+
+.botOperationContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  height: 100%;
+  width: 3rem;
+  gap: 0.4rem;
 }

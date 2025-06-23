@@ -1,15 +1,12 @@
 import { IDynamicFormItemSchema } from '@/app/infra/entities/form/dynamic';
 import { PipelineConfigTab } from '@/app/infra/entities/pipeline';
+import { I18nLabel } from '@/app/infra/entities/common';
+import { Message } from '@/app/infra/entities/message';
 
 export interface ApiResponse<T> {
   code: number;
   data: T;
   msg: string;
-}
-
-export interface I18nText {
-  en_US: string;
-  zh_Hans: string;
 }
 
 export interface AsyncTaskCreatedResp {
@@ -26,8 +23,8 @@ export interface ApiRespProviderRequester {
 
 export interface Requester {
   name: string;
-  label: I18nText;
-  description: I18nText;
+  label: I18nLabel;
+  description: I18nLabel;
   icon?: string;
   spec: {
     config: IDynamicFormItemSchema[];
@@ -84,21 +81,12 @@ export interface ApiRespPlatformAdapter {
 
 export interface Adapter {
   name: string;
-  label: I18nText;
-  description: I18nText;
+  label: I18nLabel;
+  description: I18nLabel;
   icon?: string;
   spec: {
-    config: AdapterSpecConfig[];
+    config: IDynamicFormItemSchema[];
   };
-}
-
-export interface AdapterSpecConfig {
-  default: string | number | boolean | Array<unknown>;
-  label: I18nText;
-  description?: I18nText;
-  name: string;
-  required: boolean;
-  type: string;
 }
 
 export interface ApiRespPlatformBots {
@@ -134,8 +122,8 @@ export interface ApiRespPlugin {
 export interface Plugin {
   author: string;
   name: string;
-  description: I18nText;
-  label: I18nText;
+  description: I18nLabel;
+  label: I18nLabel;
   version: string;
   enabled: boolean;
   priority: number;
@@ -216,77 +204,10 @@ export interface MarketPluginResponse {
 }
 
 interface GetPipelineConfig {
-  ai: {
-    'dashscope-app-api': {
-      'api-key': string;
-      'app-id': string;
-      'app-type': 'agent' | 'workflow';
-      'references-quote'?: string;
-    };
-    'dify-service-api': {
-      'api-key': string;
-      'app-type': 'chat' | 'agent' | 'workflow';
-      'base-url': string;
-      'thinking-convert': 'plain' | 'original' | 'remove';
-      timeout?: number;
-    };
-    'local-agent': {
-      'max-round': number;
-      model: string;
-      prompt: Array<{
-        content: string;
-        role: string;
-      }>;
-    };
-    runner: {
-      runner: 'local-agent' | 'dify-service-api' | 'dashscope-app-api';
-    };
-  };
-  output: {
-    'force-delay': {
-      max: number;
-      min: number;
-    };
-    'long-text-processing': {
-      'font-path': string;
-      strategy: 'forward' | 'image';
-      threshold: number;
-    };
-    misc: {
-      'at-sender': boolean;
-      'hide-exception': boolean;
-      'quote-origin': boolean;
-      'track-function-calls': boolean;
-    };
-  };
-  safety: {
-    'content-filter': {
-      'check-sensitive-words': boolean;
-      scope: 'all' | 'income-msg' | 'output-msg';
-    };
-    'rate-limit': {
-      limitation: number;
-      strategy: 'drop' | 'wait';
-      'window-length': number;
-    };
-  };
-  trigger: {
-    'access-control': {
-      blacklist: string[];
-      mode: 'blacklist' | 'whitelist';
-      whitelist: string[];
-    };
-    'group-respond-rules': {
-      at: boolean;
-      prefix: string[];
-      random: number;
-      regexp: string[];
-    };
-    'ignore-rules': {
-      prefix: string[];
-      regexp: string[];
-    };
-  };
+  ai: object;
+  output: object;
+  safety: object;
+  trigger: object;
 }
 
 interface GetPipeline {
@@ -307,4 +228,12 @@ export interface GetPipelineResponseData {
 
 export interface GetPipelineMetadataResponseData {
   configs: PipelineConfigTab[];
+}
+
+export interface ApiRespWebChatMessage {
+  message: Message;
+}
+
+export interface ApiRespWebChatMessages {
+  messages: Message[];
 }

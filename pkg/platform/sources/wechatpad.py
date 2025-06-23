@@ -30,6 +30,7 @@ from ..types import message as platform_message
 from ..types import events as platform_events
 from ..types import entities as platform_entities
 from ...utils import image
+from ..logger import EventLogger
 import xml.etree.ElementTree as ET
 from typing import Optional, List, Tuple
 from functools import partial
@@ -234,6 +235,7 @@ class WeChatPadMessageConverter(adapter.MessageConverter):
                     '57': self._handler_compound_quote,
                     '5': self._handler_compound_link,
                     '6': self._handler_compound_file,
+                    '74': self._handler_compound_file,
                     '33': self._handler_compound_mini_program,
                     '36': self._handler_compound_mini_program,
                     '2000': partial(self._handler_compound_unsupported, text="[转账消息]"),
@@ -319,10 +321,41 @@ class WeChatPadMessageConverter(adapter.MessageConverter):
             xml_data: ET.Element
     ) -> platform_message.MessageChain:
         """处理文件消息 (data_type=6)"""
-        xml_data_str = ET.tostring(xml_data, encoding='unicode')
-        return platform_message.MessageChain([
-            platform_message.WeChatForwardFile(xml_data=xml_data_str)
-        ])
+        file_data = xml_data.find('.//appmsg')
+
+        if file_data.findtext('.//type', "") == "74":
+            return None
+
+        else:
+            xml_data_str = ET.tostring(xml_data, encoding='unicode')
+            # print(xml_data_str)
+
+            # 提取img标签的属性
+            # print(xml_data)
+            file_name = file_data.find('title').text
+            file_id = file_data.find('md5').text
+            # file_szie = file_data.find('totallen')
+
+            # print(file_data)
+            if file_data is not None:
+                aeskey = xml_data.findtext('.//appattach/aeskey')
+                cdnthumburl = xml_data.findtext('.//appattach/cdnattachurl')
+                # cdnmidimgurl = img_tag.get('cdnmidimgurl')
+
+            # print(aeskey,cdnthumburl)
+
+            file_data = self.bot.cdn_download(aeskey=aeskey, file_type=5, file_url=cdnthumburl)
+
+            file_base64 = file_data["Data"]['FileData']
+            # print(file_data)
+            file_size = file_data["Data"]['TotalSize']
+
+            # print(file_base64)
+            return platform_message.MessageChain([
+                platform_message.WeChatFile(file_id=file_id, file_name=file_name, file_size=file_size,
+                                            file_base64=file_base64),
+                platform_message.WeChatForwardFile(xml_data=xml_data_str)
+            ])
 
     async def _handler_compound_link(
             self,
@@ -533,9 +566,10 @@ class WeChatPadAdapter(adapter.MessagePlatformAdapter):
         typing.Callable[[platform_events.Event, adapter.MessagePlatformAdapter], None],
     ] = {}
 
-    def __init__(self, config: dict, ap: app.Application):
+    def __init__(self, config: dict, ap: app.Application, logger: EventLogger):
         self.config = config
         self.ap = ap
+        self.logger = logger
         self.quart_app = quart.Quart(__name__)
 
         self.message_converter = WeChatPadMessageConverter(config)
@@ -550,7 +584,7 @@ class WeChatPadAdapter(adapter.MessagePlatformAdapter):
         try:
             event = await self.event_converter.target2yiri(data.copy(), self.bot_account_id)
         except Exception as e:
-            traceback.print_exc()
+            await self.logger.error(f"Error in wechatpad callback: {traceback.format_exc()}")
 
         if event.__class__ in self.listeners:
             await self.listeners[event.__class__](event, self)
@@ -694,7 +728,8 @@ class WeChatPadAdapter(adapter.MessagePlatformAdapter):
 
         self.bot = WeChatPadClient(
             self.config['wechatpad_url'],
-            self.config["token"]
+            self.config["token"],
+            logger=self.logger
         )
         self.ap.logger.info(self.config["token"])
         thread_1 = threading.Event()

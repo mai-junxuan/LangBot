@@ -24,7 +24,7 @@
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/RockChinQ/LangBot)](https://github.com/RockChinQ/LangBot/releases/latest)
 <img src="https://img.shields.io/badge/python-3.10 ~ 3.13 -blue.svg" alt="python">
 
-[简体中文](README.md) / [English](README_EN.md) / [日本語](README_JP.md) / (PR for your language)
+[简体中文](README.md) / English / [日本語](README_JP.md) / (PR for your language)
 
 </div>
 
@@ -135,3 +135,9 @@ Thank you for the following [code contributors](https://github.com/RockChinQ/Lan
 <a href="https://github.com/RockChinQ/LangBot/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=RockChinQ/LangBot" />
 </a>
+
+## 😎 Stay Ahead
+
+Click the Star and Watch button in the upper right corner of the repository to get the latest updates.
+
+![star gif](https://docs.langbot.app/star.gif)

@@ -45,6 +45,8 @@ class PreProcessor(stage.PipelineStage):
             query,
             session,
             query.pipeline_config['ai']['local-agent']['prompt'],
+            query.pipeline_uuid,
+            query.bot_uuid,
         )
 
         conversation.use_llm_model = llm_model
@@ -58,7 +60,7 @@ class PreProcessor(stage.PipelineStage):
 
         if selected_runner == 'local-agent':
             query.use_funcs = (
-                conversation.use_funcs if query.use_llm_model.model_entity.abilities.__contains__('tool_call') else None
+                conversation.use_funcs if query.use_llm_model.model_entity.abilities.__contains__('func_call') else None
             )
 
         query.variables = {
@@ -81,6 +83,7 @@ class PreProcessor(stage.PipelineStage):
         content_list = []
 
         plain_text = ''
+        qoute_msg = query.pipeline_config['trigger'].get('misc', '').get('combine-quote-message')
 
         for me in query.message_chain:
             if isinstance(me, platform_message.Plain):
@@ -92,6 +95,16 @@ class PreProcessor(stage.PipelineStage):
                 ):
                     if me.base64 is not None:
                         content_list.append(llm_entities.ContentElement.from_image_base64(me.base64))
+            elif isinstance(me, platform_message.Quote) and qoute_msg:
+                for msg in me.origin:
+                    if isinstance(msg, platform_message.Plain):
+                        content_list.append(llm_entities.ContentElement.from_text(msg.text))
+                    elif isinstance(msg, platform_message.Image):
+                        if selected_runner != 'local-agent' or query.use_llm_model.model_entity.abilities.__contains__(
+                            'vision'
+                        ):
+                            if msg.base64 is not None:
+                                content_list.append(llm_entities.ContentElement.from_image_base64(msg.base64))
 
         query.variables['user_message_text'] = plain_text
 
