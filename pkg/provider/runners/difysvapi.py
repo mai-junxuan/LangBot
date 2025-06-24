@@ -142,16 +142,20 @@ class DifyServiceAPIRunner(runner.RequestRunner):
             if chunk['event'] == 'workflow_started':
                 mode = 'workflow'
 
+            # 开启流式输出标记
+            enable_streaming_flag = self.pipeline_config['ai']['dify-service-api'].get('enable-streaming', False)
             if mode == 'workflow':
-                if chunk['event'] == 'node_finished':
+                # 流式输出不需要node_finished，因为node_finished之前会有一个message出来
+                if chunk['event'] == 'node_finished' and not enable_streaming_flag:
                     if chunk['data']['node_type'] == 'answer':
+                        # 如果要不清除就开启流式的时候不走下面的代码
                         yield llm_entities.Message(
                             role='assistant',
                             content=self._try_convert_thinking(chunk['data']['outputs']['answer']),
                         )
                 elif chunk['event'] == 'message':
                     stream_output_pending_chunk += chunk['answer']
-                    if self.pipeline_config['ai']['dify-service-api'].get('enable-streaming', False):
+                    if enable_streaming_flag:
                         # 消息数超过量就输出，从而达到streaming的效果
                         batch_pending_index += 1
                         if batch_pending_index >= batch_pending_max_size:
