@@ -398,7 +398,7 @@ class LarkAdapter(adapter.MessagePlatformAdapter):
                 return {'code': 500, 'message': 'error'}
 
         async def on_message(event: lark_oapi.im.v1.P2ImMessageReceiveV1):
-            if self.config['enable-card-reply'] and event.event.message.message_id not in self.message_id_to_card_id:
+            if self.config.get('enable-card-reply', False) and event.event.message.message_id not in self.message_id_to_card_id:
                 self.ap.logger.debug('卡片回复模式开启')
                 # 开启卡片回复模式. 这里可以实现飞书一发消息，马上创建卡片进行回复"思考中..."
                 reply_message_id = await self.create_message_card(event.event.message.message_id)
