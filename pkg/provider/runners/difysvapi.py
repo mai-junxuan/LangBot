@@ -183,6 +183,14 @@ class DifyServiceAPIRunner(runner.RequestRunner):
                     )
                     stream_output_pending_chunk = ''
 
+        # === 兜底 flush===
+        if stream_output_pending_chunk.strip():
+            yield llm_entities.Message(
+                role='assistant',
+                content=self._try_convert_thinking(stream_output_pending_chunk),
+            )
+            stream_output_pending_chunk = ''
+
         if chunk is None:
             raise errors.DifyAPIError('Dify API 没有返回任何响应，请检查网络连接和API配置')
 
