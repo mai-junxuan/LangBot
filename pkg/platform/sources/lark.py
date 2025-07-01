@@ -503,7 +503,7 @@ class LarkAdapter(adapter.MessagePlatformAdapter):
         )
 
         # 发起请求
-        response: PatchMessageResponse = self.api_client.im.v1.message.patch(request)
+        response: PatchMessageResponse = await self.api_client.im.v1.message.apatch(request)
 
         # 处理失败返回
         if not response.success():
