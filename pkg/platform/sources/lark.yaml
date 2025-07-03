@@ -94,7 +94,7 @@ spec:
     - name: stream_message_template_json
       label:
         en_US: stream message template json
-        zh_Hans: 消息模版JSON (转义后)
+        zh_Hans: 消息模版JSON
       type: string
       required: true
       default: "填写你的消息模版JSON"
