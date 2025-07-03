@@ -206,6 +206,8 @@ export default function BotForm({
               name: item.name,
               required: item.required,
               type: parseDynamicFormItemType(item.type),
+              options: item.options,
+              visibleWhen: item.visibleWhen,
             }),
         ),
       );

@@ -14,6 +14,7 @@ export class DynamicFormItemConfig implements IDynamicFormItemSchema {
   type: DynamicFormItemType;
   description?: I18nLabel;
   options?: IDynamicFormItemOption[];
+  visibleWhen?: Record<string, string | number | boolean>;
 
   constructor(params: IDynamicFormItemSchema) {
     this.id = params.id;
@@ -24,6 +25,7 @@ export class DynamicFormItemConfig implements IDynamicFormItemSchema {
     this.type = params.type;
     this.description = params.description;
     this.options = params.options;
+    this.visibleWhen = params.visibleWhen;
   }
 }
 

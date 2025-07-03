@@ -62,16 +62,26 @@ spec:
       type: string
       required: true
       default: ""
-    - name: enable-card-reply
+    - name: reply_mode
       label:
-        en_US: Enable Card Reply Mode
-        zh_Hans: 启用飞书卡片回复模式
-      description:
-        en_US: If enabled, the bot will use the card of lark reply mode
-        zh_Hans: 如果启用，将使用飞书卡片方式来回复内容
-      type: boolean
+        en_US: Reply Mode
+        zh_Hans: 消息回复模式
+      type: select
       required: true
-      default: false
+      default: "normal"
+      options:
+        - name: normal
+          label:
+            en_US: Normal
+            zh_Hans: 普通消息
+        - name: card
+          label:
+            en_US: Card
+            zh_Hans: 卡片消息
+        - name: stream_message
+          label:
+            en_US: Stream Message
+            zh_Hans: 流式消息
     - name: card_template_id
       label:
         en_US: card template id
@@ -79,6 +89,26 @@ spec:
       type: string
       required: true
       default: "填写你的卡片template_id"
+      visibleWhen:
+        reply_mode: card
+    - name: stream_message_template_json
+      label:
+        en_US: stream message template json
+        zh_Hans: 消息模版JSON (转义后)
+      type: string
+      required: true
+      default: "填写你的消息模版JSON"
+      visibleWhen:
+        reply_mode: stream_message
+    - name: template_variable_name
+      label:
+        en_US: template variable name
+        zh_Hans: 模板变量名
+      type: string
+      required: true
+      default: "填写模板变量名"
+      visibleWhen:
+        reply_mode: stream_message
 execution:
   python:
     path: ./lark.py

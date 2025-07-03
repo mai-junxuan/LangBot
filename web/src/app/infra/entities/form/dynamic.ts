@@ -9,6 +9,11 @@ export interface IDynamicFormItemSchema {
   type: DynamicFormItemType;
   description?: I18nLabel;
   options?: IDynamicFormItemOption[];
+  /**
+   * 当满足 visibleWhen 条件时才显示该表单项。
+   * 例如：{ 'reply_mode': 'card' }
+   */
+  visibleWhen?: Record<string, string | number | boolean>;
 }
 
 export enum DynamicFormItemType {

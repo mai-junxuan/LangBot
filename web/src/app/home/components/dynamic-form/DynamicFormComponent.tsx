@@ -131,10 +131,19 @@ export default function DynamicFormComponent({
     return () => subscription.unsubscribe();
   }, [form, onSubmit, itemConfigList]);
 
+  const watchAll = form.watch();
+
+  const visibleConfigList = itemConfigList.filter((cfg) => {
+    if (!cfg.visibleWhen) return true;
+    return Object.entries(cfg.visibleWhen).every(
+      ([dep, val]) => watchAll[dep] === val,
+    );
+  });
+
   return (
     <Form {...form}>
       <div className="space-y-4">
-        {itemConfigList.map((config) => (
+        {visibleConfigList.map((config) => (
           <FormField
             key={config.id}
             control={form.control}

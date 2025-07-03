@@ -70,7 +70,7 @@ class ChatMessageHandler(handler.MessageHandler):
                 async for result in runner.run(query):
                     query.resp_messages.append(result)
 
-                    self.ap.logger.info(f'对话({query.query_id})响应: {self.cut_str(result.readable_str())}')
+                    self.ap.logger.info(f'对话({query.query_id})响应: {result.readable_str()}')
 
                     if result.content is not None:
                         text_length += len(result.content)
