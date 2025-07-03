@@ -564,12 +564,10 @@ class LarkAdapter(adapter.MessagePlatformAdapter):
             .build()
         self.message_id_to_sequence[message_id] = self.message_id_to_sequence[message_id] + 1
         # 发起请求
+        self.ap.logger.info(f"ContentCardElementRequest:{request}")
         response: ContentCardElementResponse = await self.api_client.cardkit.v1.card_element.acontent(request)
-
+        self.ap.logger.info(f"ContentCardElementResponse:{response.msg}")
         # 处理失败返回
-        if not response.success():
-            await self.logger.error(
-                f"client.cardkit.v1.card_element.content failed, code: {response.code}, msg: {response.msg}, log_id: {response.get_log_id()}, resp: \n{json.dumps(json.loads(response.raw.content), indent=4, ensure_ascii=False)}")
 
     async def reply_normal_message(
         self,

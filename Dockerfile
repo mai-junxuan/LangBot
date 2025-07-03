@@ -19,7 +19,7 @@ RUN echo "deb https://mirrors.tuna.tsinghua.edu.cn/debian bookworm main contrib 
     && echo "deb https://mirrors.tuna.tsinghua.edu.cn/debian-security bookworm-security main contrib non-free" >> /etc/apt/sources.list \
     && apt update \
     && apt install gcc -y \
-    && python -m pip install --no-cache-dir uv \
+    && python -m pip install --no-cache-dir -i https://pypi.tuna.tsinghua.edu.cn/simple uv \
     && uv sync \
     && touch /.dockerenv
 
