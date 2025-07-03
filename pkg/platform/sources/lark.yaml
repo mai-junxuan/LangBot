@@ -74,10 +74,10 @@ spec:
           label:
             en_US: Normal
             zh_Hans: 普通消息
-        - name: card
-          label:
-            en_US: Card
-            zh_Hans: 卡片消息
+#        - name: card
+#          label:
+#            en_US: Card
+#            zh_Hans: 卡片消息
         - name: stream_message
           label:
             en_US: Stream Message
