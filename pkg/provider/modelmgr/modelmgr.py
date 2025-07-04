@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import sqlalchemy
+import traceback
 
 from . import entities, requester
 from ...core import app
 from ...discover import engine
 from . import token
 from ...entity.persistence import model as persistence_model
+from ...entity.errors import provider as provider_errors
 
 FETCH_MODEL_LIST_URL = 'https://api.qchatgpt.rockchin.top/api/v2/fetch/model_list'
 
@@ -64,7 +66,12 @@ class ModelManager:
 
         # load models
         for llm_model in llm_models:
-            await self.load_llm_model(llm_model)
+            try:
+                await self.load_llm_model(llm_model)
+            except provider_errors.RequesterNotFoundError as e:
+                self.ap.logger.warning(f'Requester {e.requester_name} not found, skipping model {llm_model.uuid}')
+            except Exception as e:
+                self.ap.logger.error(f'Failed to load model {llm_model.uuid}: {e}\n{traceback.format_exc()}')
 
     async def init_runtime_llm_model(
         self,
@@ -75,6 +82,9 @@ class ModelManager:
             model_info = persistence_model.LLMModel(**model_info._mapping)
         elif isinstance(model_info, dict):
             model_info = persistence_model.LLMModel(**model_info)
+
+        if model_info.requester not in self.requester_dict:
+            raise provider_errors.RequesterNotFoundError(model_info.requester)
 
         requester_inst = self.requester_dict[model_info.requester](ap=self.ap, config=model_info.requester_config)
 

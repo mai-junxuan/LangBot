@@ -67,12 +67,14 @@ export default function BotForm({
   onFormCancel,
   onBotDeleted,
   onNewBotCreated,
+  hideButtons = false,
 }: {
   initBotId?: string;
   onFormSubmit: (value: z.infer<ReturnType<typeof getFormSchema>>) => void;
   onFormCancel: () => void;
   onBotDeleted: () => void;
   onNewBotCreated: (botId: string) => void;
+  hideButtons?: boolean;
 }) {
   const { t } = useTranslation();
   const formSchema = getFormSchema(t);
@@ -284,7 +286,7 @@ export default function BotForm({
         })
         .finally(() => {
           setIsLoading(false);
-          form.reset();
+          // form.reset();
           // dynamicForm.resetFields();
         });
     } else {
@@ -316,8 +318,6 @@ export default function BotForm({
           // dynamicForm.resetFields();
         });
     }
-    setShowDynamicForm(false);
-    console.log('set loading', false);
   }
 
   function deleteBot() {
@@ -367,6 +367,7 @@ export default function BotForm({
 
       <Form {...form}>
         <form
+          id="bot-form"
           onSubmit={form.handleSubmit(onDynamicFormSubmit)}
           className="space-y-8"
         >
@@ -529,42 +530,44 @@ export default function BotForm({
             )}
           </div>
 
-          <div className="sticky bottom-0 left-0 right-0 bg-background border-t p-4 mt-4">
-            <div className="flex justify-end gap-2">
-              {!initBotId && (
-                <Button
-                  type="submit"
-                  onClick={form.handleSubmit(onDynamicFormSubmit)}
-                >
-                  {t('common.submit')}
-                </Button>
-              )}
-              {initBotId && (
-                <>
+          {!hideButtons && (
+            <div className="sticky bottom-0 left-0 right-0 bg-background border-t p-4 mt-4">
+              <div className="flex justify-end gap-2">
+                {!initBotId && (
                   <Button
-                    type="button"
-                    variant="destructive"
-                    onClick={() => setShowDeleteConfirmModal(true)}
-                  >
-                    {t('common.delete')}
-                  </Button>
-                  <Button
-                    type="button"
+                    type="submit"
                     onClick={form.handleSubmit(onDynamicFormSubmit)}
                   >
-                    {t('common.save')}
+                    {t('common.submit')}
                   </Button>
-                </>
-              )}
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onFormCancel()}
-              >
-                {t('common.cancel')}
-              </Button>
+                )}
+                {initBotId && (
+                  <>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      onClick={() => setShowDeleteConfirmModal(true)}
+                    >
+                      {t('common.delete')}
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={form.handleSubmit(onDynamicFormSubmit)}
+                    >
+                      {t('common.save')}
+                    </Button>
+                  </>
+                )}
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onFormCancel()}
+                >
+                  {t('common.cancel')}
+                </Button>
+              </div>
             </div>
-          </div>
+          )}
         </form>
       </Form>
     </div>

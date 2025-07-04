@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import asyncio
+
 from .. import stage, app, note
 from ...utils import importutil
 
@@ -20,11 +22,15 @@ class ShowNotesStage(stage.BootingStage):
             try:
                 note_inst = note_cls(ap)
                 if await note_inst.need_show():
-                    async for ret in note_inst.yield_note():
-                        if not ret:
-                            continue
-                        msg, level = ret
-                        if msg:
-                            ap.logger.log(level, msg)
+
+                    async def ayield_note(note_inst: note.LaunchNote):
+                        async for ret in note_inst.yield_note():
+                            if not ret:
+                                continue
+                            msg, level = ret
+                            if msg:
+                                ap.logger.log(level, msg)
+
+                    asyncio.create_task(ayield_note(note_inst))
             except Exception:
                 continue

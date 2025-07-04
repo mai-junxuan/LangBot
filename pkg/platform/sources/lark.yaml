@@ -29,6 +29,9 @@ spec:
       label:
         en_US: Bot Name
         zh_Hans: 机器人名称
+      description:
+        en_US: Must be the same as the name of the bot in Lark, otherwise the bot will not be able to receive messages in the group
+        zh_Hans: 必须与飞书机器人名称一致，否则机器人将无法在群内正常接收消息
       type: string
       required: true
       default: ""

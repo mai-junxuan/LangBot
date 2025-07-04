@@ -129,6 +129,8 @@ const enUS = {
     dateFormat: '{{month}}/{{day}}',
     setBotEnableError: 'Failed to set bot enable status',
     log: 'Log',
+    configuration: 'Configuration',
+    logs: 'Logs',
   },
   plugins: {
     title: 'Plugins',
@@ -185,6 +187,8 @@ const enUS = {
     createPipeline: 'Create Pipeline',
     editPipeline: 'Edit Pipeline',
     chat: 'Chat',
+    configuration: 'Configuration',
+    debugChat: 'Debug Chat',
     getPipelineListError: 'Failed to get pipeline list: ',
     daysAgo: 'days ago',
     today: 'Today',
@@ -204,6 +208,8 @@ const enUS = {
     deleteConfirmation:
       'Are you sure you want to delete this pipeline? Bots bound to this pipeline will not work.',
     defaultPipelineCannotDelete: 'Default pipeline cannot be deleted',
+    deleteSuccess: 'Deleted successfully',
+    deleteError: 'Delete failed: ',
     debugDialog: {
       title: 'Pipeline Chat',
       selectPipeline: 'Select Pipeline',
@@ -212,7 +218,7 @@ const enUS = {
       groupChat: 'Group Chat',
       send: 'Send',
       reset: 'Reset Conversation',
-      inputPlaceholder: 'Enter message...',
+      inputPlaceholder: 'Send {{type}} message...',
       noMessages: 'No messages',
       userMessage: 'User',
       botMessage: 'Bot',

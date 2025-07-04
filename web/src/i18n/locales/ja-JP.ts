@@ -130,6 +130,8 @@ const jaJP = {
     dateFormat: '{{month}}月{{day}}日',
     setBotEnableError: 'ボットの有効状態の設定に失敗しました',
     log: 'ログ',
+    configuration: '設定',
+    logs: 'ログ',
   },
   plugins: {
     title: 'プラグイン',
@@ -185,6 +187,8 @@ const jaJP = {
     createPipeline: 'パイプラインを作成',
     editPipeline: 'パイプラインを編集',
     chat: 'チャット',
+    configuration: '設定',
+    debugChat: 'チャットデバッグ',
     getPipelineListError: 'パイプラインリストの取得に失敗しました：',
     daysAgo: '日前',
     today: '今日',
@@ -205,6 +209,8 @@ const jaJP = {
     deleteConfirmation:
       '本当にこのパイプラインを削除しますか？このパイプラインに紐付けられたボットは動作しなくなります。',
     defaultPipelineCannotDelete: 'デフォルトパイプラインは削除できません',
+    deleteSuccess: '削除に成功しました',
+    deleteError: '削除に失敗しました：',
     debugDialog: {
       title: 'パイプラインのチャット',
       selectPipeline: 'パイプラインを選択',
@@ -213,7 +219,7 @@ const jaJP = {
       groupChat: 'グループチャット',
       send: '送信',
       reset: '会話をリセット',
-      inputPlaceholder: 'メッセージを入力...',
+      inputPlaceholder: '{{type}}メッセージを送信...',
       noMessages: 'メッセージがありません',
       userMessage: 'ユーザー',
       botMessage: 'ボット',
