@@ -121,7 +121,8 @@ class DifyServiceAPIRunner(runner.RequestRunner):
         inputs.update(query.variables)
 
         chunk = None  # 初始化chunk变量，防止在没有响应时引用错误
-
+        # 开启流式输出标记
+        enable_streaming_flag = self.pipeline_config['ai']['dify-service-api'].get('enable-streaming', False)
         async for chunk in self.dify_client.chat_messages(
             inputs=inputs,
             query=plain_text,
@@ -130,7 +131,7 @@ class DifyServiceAPIRunner(runner.RequestRunner):
             files=files,
             timeout=120,
         ):
-            self.ap.logger.debug('dify-chat-chunk: ' + str(chunk))
+            self.ap.logger.info('dify-chat-chunk: ' + str(chunk))
 
             # 查询异常情况
             if chunk['event'] == 'error':
@@ -142,13 +143,13 @@ class DifyServiceAPIRunner(runner.RequestRunner):
             if chunk['event'] == 'workflow_started':
                 mode = 'workflow'
 
-            # 开启流式输出标记
-            enable_streaming_flag = self.pipeline_config['ai']['dify-service-api'].get('enable-streaming', False)
+
             if mode == 'workflow':
                 # 流式输出不需要node_finished，因为node_finished之前会有一个message出来
                 if chunk['event'] == 'node_finished' and not enable_streaming_flag:
                     if chunk['data']['node_type'] == 'answer':
                         # 如果要不清除就开启流式的时候不走下面的代码
+                        self.ap.logger.info("workflow node_finished")
                         yield llm_entities.Message(
                             role='assistant',
                             content=self._try_convert_thinking(chunk['data']['outputs']['answer']),
@@ -177,6 +178,7 @@ class DifyServiceAPIRunner(runner.RequestRunner):
                             )
                             batch_pending_index = 0
                 elif chunk['event'] == 'message_end':
+                    self.ap.logger.info("basic message_end")
                     yield llm_entities.Message(
                         role='assistant',
                         content=self._try_convert_thinking(stream_output_pending_chunk),
@@ -184,7 +186,7 @@ class DifyServiceAPIRunner(runner.RequestRunner):
                     stream_output_pending_chunk = ''
 
         # === 兜底 flush===
-        if stream_output_pending_chunk.strip():
+        if enable_streaming_flag and stream_output_pending_chunk.strip():
             yield llm_entities.Message(
                 role='assistant',
                 content=self._try_convert_thinking(stream_output_pending_chunk),
