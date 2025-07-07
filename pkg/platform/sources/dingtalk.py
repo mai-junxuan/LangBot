@@ -116,6 +116,15 @@ class DingTalkAdapter(adapter.MessagePlatformAdapter):
 
         self.bot_account_id = self.config['robot_name']
 
+        self.bot = DingTalkClient(
+            client_id=config['client_id'],
+            client_secret=config['client_secret'],
+            robot_name=config['robot_name'],
+            robot_code=config['robot_code'],
+            markdown_card=config['markdown_card'],
+            logger=self.logger,
+        )
+
     async def reply_message(
         self,
         message_source: platform_events.MessageEvent,
@@ -157,15 +166,6 @@ class DingTalkAdapter(adapter.MessagePlatformAdapter):
             self.bot.on_message('GroupMessage')(on_message)
 
     async def run_async(self):
-        config = self.config
-        self.bot = DingTalkClient(
-            client_id=config['client_id'],
-            client_secret=config['client_secret'],
-            robot_name=config['robot_name'],
-            robot_code=config['robot_code'],
-            markdown_card=config['markdown_card'],
-            logger=self.logger,
-        )
         await self.bot.start()
 
     async def kill(self) -> bool:

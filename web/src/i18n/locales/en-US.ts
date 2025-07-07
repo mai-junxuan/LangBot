@@ -39,6 +39,7 @@ const enUS = {
     addRound: 'Add Round',
     copySuccess: 'Copy Successfully',
     test: 'Test',
+    forgotPassword: 'Forgot Password?',
   },
   notFound: {
     title: 'Page not found',
@@ -238,6 +239,25 @@ const enUS = {
     register: 'Register',
     initSuccess: 'Initialization successful, please login',
     initFailed: 'Initialization failed: ',
+  },
+  resetPassword: {
+    title: 'Reset Password 🔐',
+    description:
+      'Enter your recovery key and new password to reset your account password',
+    recoveryKey: 'Recovery Key',
+    recoveryKeyDescription:
+      'Stored in `system.recovery_key` of config file `data/config.yaml`',
+    newPassword: 'New Password',
+    enterRecoveryKey: 'Enter recovery key',
+    enterNewPassword: 'Enter new password',
+    recoveryKeyRequired: 'Recovery key cannot be empty',
+    newPasswordRequired: 'New password cannot be empty',
+    resetPassword: 'Reset Password',
+    resetting: 'Resetting...',
+    resetSuccess: 'Password reset successfully, please login',
+    resetFailed:
+      'Password reset failed, please check your email and recovery key',
+    backToLogin: 'Back to Login',
   },
 };
 
