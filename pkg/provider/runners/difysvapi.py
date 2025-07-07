@@ -191,6 +191,11 @@ class DifyServiceAPIRunner(runner.RequestRunner):
                 role='assistant',
                 content=self._try_convert_thinking(stream_output_pending_chunk),
             )
+            yield llm_entities.Message(
+                role='assistant',
+                name='__end__',
+                content=self._try_convert_thinking(stream_output_pending_chunk)
+            )
             stream_output_pending_chunk = ''
 
         if chunk is None:
