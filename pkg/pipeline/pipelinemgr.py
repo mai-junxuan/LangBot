@@ -169,6 +169,35 @@ class RuntimePipeline:
 
             i += 1
 
+
+
+    async def _emit_final_responded_end_event(self, query: entities.Query):
+        """统一触发 NormalMessageRespondedEnd 事件"""
+        if query.resp_messages and len(query.resp_messages) > 0:
+            result = query.resp_messages[-1]
+            if result.role == 'assistant':
+                session = await self.ap.sess_mgr.get_session(query)
+                
+                reply_text = ''
+                if result.content:
+                    reply_text = str(result.get_content_platform_message_chain())
+                
+                await self.ap.plugin_mgr.emit_event(
+                    event=events.NormalMessageRespondedEnd(
+                        launcher_type=query.launcher_type.value,
+                        launcher_id=query.launcher_id,
+                        sender_id=query.sender_id,
+                        session=session,
+                        prefix='',
+                        response_text=reply_text,
+                        finish_reason='stop',
+                        funcs_called=[fc.function.name for fc in result.tool_calls]
+                        if result.tool_calls is not None
+                        else [],
+                        query=query,
+                    )
+                )
+
     async def process_query(self, query: entities.Query):
         """处理请求"""
         try:
@@ -195,6 +224,9 @@ class RuntimePipeline:
             self.ap.logger.debug(f'Processing query {query}')
 
             await self._execute_from_stage(0, query)
+
+            # 所有 Stage 执行完毕后，触发 NormalMessageRespondedEnd 事件（如果有最终回复信息）
+            await self._emit_final_responded_end_event(query)
         except Exception as e:
             inst_name = query.current_stage.inst_name if query.current_stage else 'unknown'
             self.ap.logger.error(f'处理请求时出错 query_id={query.query_id} stage={inst_name} : {e}')

@@ -158,6 +158,40 @@ class NormalMessageResponded(BaseEventModel):
     """回复消息组件列表"""
 
 
+class NormalMessageRespondedEnd(BaseEventModel):
+    """回复普通消息**全部完成**时触发（含流式分段输出的收尾）
+
+    @author maijunxuan @date 2025-07-07
+    当一次完整的普通消息回复全部输出完成后（例如
+    streaming 最后一次 delta、普通模式最后一次 send），
+    由框架触发此事件，方便插件做收尾统计、日志等。
+    """
+
+    launcher_type: str
+
+    launcher_id: typing.Union[int, str]
+
+    sender_id: typing.Union[int, str]
+
+    session: core_entities.Session
+    """会话对象"""
+
+    prefix: str
+    """回复消息的前缀"""
+
+    response_text: str
+    """回复消息的文本"""
+
+    finish_reason: str
+    """响应结束原因"""
+
+    funcs_called: list[str]
+    """调用的函数列表"""
+
+    reply: typing.Optional[list] = None
+    """回复消息组件列表"""
+
+
 class PromptPreProcessing(BaseEventModel):
     """会话中的Prompt预处理时触发"""
 
